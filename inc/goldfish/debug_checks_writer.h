@@ -12,6 +12,9 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class inner> class stream_writer : private container_base<error_handler>
 	{
 	public:
+		using container_base<error_handler>::err_if_locked;
+		using container_base<error_handler>::unlock_parent_and_lock_self;
+
 		stream_writer(container_base<error_handler>* parent, inner writer)
 			: container_base<error_handler>(parent)
 			, m_writer(std::move(writer))
@@ -63,6 +66,9 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class inner> class array_writer : private container_base<error_handler>
 	{
 	public:
+		using container_base<error_handler>::err_if_locked;
+		using container_base<error_handler>::unlock_parent_and_lock_self;
+
 		array_writer(container_base<error_handler>* parent, inner writer)
 			: container_base<error_handler>(parent)
 			, m_writer(std::move(writer))
@@ -114,6 +120,13 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class inner> class map_writer : private container_base<error_handler>
 	{
 	public:
+		using container_base<error_handler>::err_if_flag_set;
+		using container_base<error_handler>::err_if_flag_not_set;
+		using container_base<error_handler>::err_if_locked;
+		using container_base<error_handler>::clear_flag;
+		using container_base<error_handler>::set_flag;
+		using container_base<error_handler>::unlock_parent_and_lock_self;
+
 		map_writer(container_base<error_handler>* parent, inner writer)
 			: container_base<error_handler>(parent)
 			, m_writer(std::move(writer))
@@ -179,6 +192,11 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class inner> class document_writer : private container_base<error_handler>
 	{
 	public:
+		using container_base<error_handler>::err_if_locked;
+		using container_base<error_handler>::lock;
+		using container_base<error_handler>::parent;
+		using container_base<error_handler>::unlock_parent_and_lock_self;
+
 		document_writer(container_base<error_handler>* parent, inner writer)
 			: container_base<error_handler>(parent)
 			, m_writer(std::move(writer))
