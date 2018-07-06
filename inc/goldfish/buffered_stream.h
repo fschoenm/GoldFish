@@ -177,13 +177,14 @@ namespace goldfish { namespace stream
 	private:
 		size_t cb_free() const { return m_buffer_data.data() + N - m_begin_free_space; }
 		template <size_t cb> void write_static(const byte* t, std::false_type /*small*/) { write_buffer({ t, cb }); }
-		template <size_t cb> void write_static(const byte* t, std::true_type /*small*/)
+		template <size_t cb, typename std::enable_if<cb!=1>::type * = nullptr > void write_static(const byte* t, std::true_type /*small*/)
 		{
 			if (cb_free() < cb)
 				send_data();
 			m_begin_free_space = std::copy(t, t + cb, m_begin_free_space);
 		}
-		template <> void write_static<1>(const byte* t, std::true_type /*small*/)
+		
+		template <size_t cb, typename std::enable_if<cb==1>::type * = nullptr > void write_static(const byte* t, std::true_type /*small*/)
 		{
 			if (m_begin_free_space == m_buffer_data.data() + N)
 				send_data();
