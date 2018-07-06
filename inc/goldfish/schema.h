@@ -8,6 +8,7 @@
 
 namespace goldfish
 {
+	template <class Document> void seek_to_end(Document&& d);
 	namespace details
 	{
 		template <size_t N> constexpr const_buffer_ref make_key(const char(&text)[N])
