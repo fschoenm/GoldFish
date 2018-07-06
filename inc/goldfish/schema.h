@@ -4,6 +4,7 @@
 #include "optional.h"
 #include "tags.h"
 #include <vector>
+#include <algorithm>
 
 namespace goldfish
 {

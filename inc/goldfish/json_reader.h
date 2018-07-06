@@ -7,6 +7,7 @@
 #include "stream.h"
 #include "optional.h"
 #include "sax_reader.h"
+#include <cmath>
 
 namespace goldfish { namespace json
 {

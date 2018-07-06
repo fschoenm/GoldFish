@@ -7,6 +7,7 @@
 #include "buffered_stream.h"
 #include "schema.h"
 #include <type_traits>
+#include <variant>
 
 namespace goldfish
 {

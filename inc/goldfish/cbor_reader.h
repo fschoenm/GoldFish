@@ -8,6 +8,7 @@
 #include "stream.h"
 #include "tags.h"
 #include "variant.h"
+#include <cmath>
 
 namespace goldfish { namespace cbor
 {
