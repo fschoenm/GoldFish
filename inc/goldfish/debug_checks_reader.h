@@ -76,6 +76,8 @@ namespace goldfish { namespace debug_checks
 
 	template <class error_handler, class T> class array : private container_base<error_handler>
 	{
+		using container_base<error_handler>::unlock_parent;
+		using container_base<error_handler>::err_if_locked;
 	public:
 		using tag = tags::array;
 
@@ -107,6 +109,12 @@ namespace goldfish { namespace debug_checks
 	// The inheritance is public so that schema.h can use container_base to more aggressively lock the parent
 	template <class error_handler, class T> class map : public container_base<error_handler>
 	{
+		using container_base<error_handler>::unlock_parent;
+		using container_base<error_handler>::err_if_locked;
+		using container_base<error_handler>::err_if_flag_set;
+		using container_base<error_handler>::err_if_flag_not_set;
+		using container_base<error_handler>::set_flag;
+		using container_base<error_handler>::clear_flag;
 	public:
 		using tag = tags::map;
 

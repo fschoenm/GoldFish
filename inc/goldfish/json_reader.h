@@ -329,6 +329,7 @@ namespace goldfish { namespace json
 	};
 	template <class Stream> class array : public comma_separated_reader<Stream, ']'>
 	{
+		using comma_separated_reader<Stream, ']'>::read_comma_separated;
 	public:
 		using tag = tags::array;
 		using comma_separated_reader<Stream, ']'>::comma_separated_reader;
@@ -336,6 +337,8 @@ namespace goldfish { namespace json
 	};
 	template <class Stream> class map : public comma_separated_reader<Stream, '}'>
 	{
+		using comma_separated_reader<Stream, '}'>::read_comma_separated;
+		using comma_separated_reader<Stream, '}'>::m_stream;
 	public:
 		using tag = tags::map;
 		using comma_separated_reader<Stream, '}'>::comma_separated_reader;
