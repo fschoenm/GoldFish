@@ -230,20 +230,20 @@ namespace goldfish { namespace cbor
 		if (additional <= 23)
 			return additional;
 		else if (additional == 24)
-			return read<byte>(s);
+			return stream::read<byte>(s);
 		else if (additional == 25)
-			return from_big_endian(read<uint16_t>(s));
+			return from_big_endian(stream::read<uint16_t>(s));
 		else if (additional == 26)
-			return from_big_endian(read<uint32_t>(s));
+			return from_big_endian(stream::read<uint32_t>(s));
 		else if (additional == 27)
-			return from_big_endian(read<uint64_t>(s));
+			return from_big_endian(stream::read<uint64_t>(s));
 		else
 			throw ill_formatted_cbor_data{ "Bad CBOR integer encoding" };
 	}
-	template <class stream> double read_half_point_float(stream& s)
+	template <class Stream> double read_half_point_float(Stream& s)
 	{
-		int half = (read<byte>(s) << 8);
-		half += read<byte>(s);
+		int half = (stream::read<byte>(s) << 8);
+		half += stream::read<byte>(s);
 		int exp = (half >> 10) & 0x1f;
 		int mant = half & 0x3ff;
 		double val;
@@ -397,7 +397,7 @@ namespace goldfish { namespace cbor
 		static_assert(
 			!std::is_trivially_move_constructible<std::decay_t<Stream>>::value ||
 			std::is_trivially_move_constructible<document<std::decay_t<Stream>>>::value, "A cbor document on a trivially move constructible stream should be trivially move constructible");
-		return read_helper<std::decay_t<Stream>>::read(std::forward<Stream>(s), read<byte>(s));
+		return read_helper<std::decay_t<Stream>>::read(std::forward<Stream>(s), stream::read<byte>(s));
 	}
 
 	template <class Stream, class error_handler> auto read(Stream&& s, error_handler e)
