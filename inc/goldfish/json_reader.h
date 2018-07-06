@@ -41,7 +41,7 @@ namespace goldfish { namespace json
 		{
 			for (;;)
 			{
-				auto c = s.peek<char>();
+				auto c = s.template peek<char>();
 				if (c != ' ' && c != '\t' && c != '\r' && c != '\n')
 					return c;
 				else
@@ -332,7 +332,7 @@ namespace goldfish { namespace json
 		auto read_key()
 		{
 			auto key = read_comma_separated();
-			if (key && !key->is_exactly<tags::string>())
+			if (key && !key->template is_exactly<tags::string>())
 				throw ill_formatted_json_data{ "Only strings are supported for JSON keys" };
 			return key;
 		}
@@ -363,7 +363,7 @@ namespace goldfish { namespace json
 		uint64_t result = (first - '0');
 		for (;;)
 		{
-			auto c = s.peek<char>();
+			auto c = s.template peek<char>();
 			if (c == nullopt || *c < '0' || *c > '9')
 				return result;
 
@@ -375,7 +375,7 @@ namespace goldfish { namespace json
 	}
 	template <class Stream> double read_decimals(Stream& s)
 	{
-		auto first = s.peek<char>();
+		auto first = s.template peek<char>();
 		if (first == nullopt || *first < '0' || *first > '9')
 			throw ill_formatted_json_data{ "Invalid digit in JSON integer" };
 
@@ -383,7 +383,7 @@ namespace goldfish { namespace json
 		double divider = 1;
 		for (;;)
 		{
-			auto c = s.peek<char>();
+			auto c = s.template peek<char>();
 			if (c == nullopt || *c < '0' || *c > '9')
 				return result;
 
@@ -403,7 +403,7 @@ namespace goldfish { namespace json
 
 		auto integer = read_unsigned_integer(s, first, false /*allow_leading_zeroes*/);
 
-		auto floating_point_marker = s.peek<char>();
+		auto floating_point_marker = s.template peek<char>();
 		if (floating_point_marker != '.' && floating_point_marker != 'e' && floating_point_marker != 'E')
 		{
 			if (negative)
@@ -425,7 +425,7 @@ namespace goldfish { namespace json
 		{
 			stream::read<char>(s);
 			decimals = read_decimals(s);
-			floating_point_marker = s.peek<char>();
+			floating_point_marker = s.template peek<char>();
 		}
 
 		double multiplier = 1.;
