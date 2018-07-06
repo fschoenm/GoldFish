@@ -145,7 +145,7 @@ namespace goldfish { namespace json
 			else
 			{
 				//            12345678901234567890
-				static_assert(18446744073709551615 == std::numeric_limits<uint64_t>::max(), "The max value of uint64 fits on 20 base 10 digits");
+				static_assert(18446744073709551615ull == std::numeric_limits<uint64_t>::max(), "The max value of uint64 fits on 20 base 10 digits");
 				uint8_t buffer[20];
 				uint8_t* it = std::end(buffer);
 				do
