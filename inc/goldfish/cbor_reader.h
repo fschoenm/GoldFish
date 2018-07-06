@@ -255,19 +255,19 @@ namespace goldfish { namespace cbor
 
 	template <class Stream> struct read_helper
 	{
-		template <uint64_t value> static optional<document<Stream>> fn_uint(Stream&&, byte) { return value; }
-		static optional<document<Stream>> fn_small_uint(Stream&& s, byte first_byte) { return static_cast<uint64_t>(first_byte & 31); };
-		static optional<document<Stream>> fn_uint_8(Stream&& s, byte first_byte) { return static_cast<uint64_t>(stream::read<uint8_t>(s)); }
-		static optional<document<Stream>> fn_uint_16(Stream&& s, byte first_byte) { return static_cast<uint64_t>(from_big_endian(stream::read<uint16_t>(s))); }
-		static optional<document<Stream>> fn_uint_32(Stream&& s, byte first_byte) { return static_cast<uint64_t>(from_big_endian(stream::read<uint32_t>(s))); }
-		static optional<document<Stream>> fn_uint_64(Stream&& s, byte first_byte) { return from_big_endian(stream::read<uint64_t>(s)); }
+		template <uint64_t value> static optional<document<Stream>> fn_uint(Stream&&, byte) { return document<Stream>(value); }
+		static optional<document<Stream>> fn_small_uint(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(first_byte & 31)); };
+		static optional<document<Stream>> fn_uint_8(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(stream::read<uint8_t>(s))); }
+		static optional<document<Stream>> fn_uint_16(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint16_t>(s)))); }
+		static optional<document<Stream>> fn_uint_32(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint32_t>(s)))); }
+		static optional<document<Stream>> fn_uint_64(Stream&& s, byte first_byte) { return document<Stream>(from_big_endian(stream::read<uint64_t>(s))); }
 		static optional<document<Stream>> fn_neg_int(Stream&& s, byte first_byte)
 		{
 			auto x = read_integer(static_cast<byte>(first_byte & 31), s);
 			if (x > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
 				throw ill_formatted_cbor_data{ "CBOR signed integer too large" };
 
-			return -1 - static_cast<int64_t>(x);
+			return document<Stream>(-1 - static_cast<int64_t>(x));
 		}
 
 		static optional<document<Stream>> fn_tag(Stream&& s, byte first_byte)
@@ -281,44 +281,44 @@ namespace goldfish { namespace cbor
 
 			return read(std::forward<Stream>(s), first_byte);
 		}
-		static optional<document<Stream>> fn_false(Stream&&, byte) { return false; }
-		static optional<document<Stream>> fn_true(Stream&&, byte) { return true; }
-		static optional<document<Stream>> fn_null(Stream&&, byte) { return nullptr; }
-		static optional<document<Stream>> fn_undefined(Stream&&, byte) { return undefined{}; }
+		static optional<document<Stream>> fn_false(Stream&&, byte) { return document<Stream>(false); }
+		static optional<document<Stream>> fn_true(Stream&&, byte) { return document<Stream>(true); }
+		static optional<document<Stream>> fn_null(Stream&&, byte) { return document<Stream>(nullptr); }
+		static optional<document<Stream>> fn_undefined(Stream&&, byte) { return document<Stream>(undefined{}); }
 		static optional<document<Stream>> fn_end_of_structure(Stream&&, byte) { return nullopt; }
 
-		static optional<document<Stream>> fn_float_16(Stream&& s, byte) { return read_half_point_float(s); }
-		static optional<document<Stream>> fn_float_32(Stream&& s, byte) { return double{ to_float(from_big_endian(stream::read<uint32_t>(s))) }; }
-		static optional<document<Stream>> fn_float_64(Stream&& s, byte) { return to_double(from_big_endian(stream::read<uint64_t>(s))); }
+		static optional<document<Stream>> fn_float_16(Stream&& s, byte) { return document<Stream>(read_half_point_float(s)); }
+		static optional<document<Stream>> fn_float_32(Stream&& s, byte) { return document<Stream>(double{ to_float(from_big_endian(stream::read<uint32_t>(s))) }); }
+		static optional<document<Stream>> fn_float_64(Stream&& s, byte) { return document<Stream>(to_double(from_big_endian(stream::read<uint64_t>(s)))); }
 		static optional<document<Stream>> fn_ill_formatted(Stream&&, byte) { throw ill_formatted_cbor_data{ "Unexpected CBOR opcode" }; };
 
-		static optional<document<Stream>> fn_small_binary(Stream&& s, byte first_byte) { return byte_string<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }; };
-		static optional<document<Stream>> fn_8_binary(Stream&& s, byte) { return byte_string<Stream>{ std::move(s), stream::read<uint8_t>(s) }; };
-		static optional<document<Stream>> fn_16_binary(Stream&& s, byte) { return byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }; };
-		static optional<document<Stream>> fn_32_binary(Stream&& s, byte) { return byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }; };
-		static optional<document<Stream>> fn_64_binary(Stream&& s, byte) { return byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }; };
-		static optional<document<Stream>> fn_null_terminated_binary(Stream&& s, byte) { return byte_string<Stream>{ std::move(s) }; };
+		static optional<document<Stream>> fn_small_binary(Stream&& s, byte first_byte) { return document<Stream>(byte_string<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }); };
+		static optional<document<Stream>> fn_8_binary(Stream&& s, byte) { return document<Stream>(byte_string<Stream>{ std::move(s), stream::read<uint8_t>(s) }); };
+		static optional<document<Stream>> fn_16_binary(Stream&& s, byte) { return document<Stream>(byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }); };
+		static optional<document<Stream>> fn_32_binary(Stream&& s, byte) { return document<Stream>(byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }); };
+		static optional<document<Stream>> fn_64_binary(Stream&& s, byte) { return document<Stream>(byte_string<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }); };
+		static optional<document<Stream>> fn_null_terminated_binary(Stream&& s, byte) { return document<Stream>(byte_string<Stream>{ std::move(s) }); };
 
-		static optional<document<Stream>> fn_small_text(Stream&& s, byte first_byte) { return text_string<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }; };
-		static optional<document<Stream>> fn_8_text(Stream&& s, byte) { return text_string<Stream>{ std::move(s), stream::read<uint8_t>(s) }; };
-		static optional<document<Stream>> fn_16_text(Stream&& s, byte) { return text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }; };
-		static optional<document<Stream>> fn_32_text(Stream&& s, byte) { return text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }; };
-		static optional<document<Stream>> fn_64_text(Stream&& s, byte) { return text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }; };
-		static optional<document<Stream>> fn_null_terminated_text(Stream&& s, byte) { return text_string<Stream>{ std::move(s) }; };
+		static optional<document<Stream>> fn_small_text(Stream&& s, byte first_byte) { return document<Stream>(text_string<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }); };
+		static optional<document<Stream>> fn_8_text(Stream&& s, byte) { return document<Stream>(text_string<Stream>{ std::move(s), stream::read<uint8_t>(s) }); };
+		static optional<document<Stream>> fn_16_text(Stream&& s, byte) { return document<Stream>(text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }); };
+		static optional<document<Stream>> fn_32_text(Stream&& s, byte) { return document<Stream>(text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }); };
+		static optional<document<Stream>> fn_64_text(Stream&& s, byte) { return document<Stream>(text_string<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }); };
+		static optional<document<Stream>> fn_null_terminated_text(Stream&& s, byte) { return document<Stream>(text_string<Stream>{ std::move(s) }); };
 
-		static optional<document<Stream>> fn_small_array(Stream&& s, byte first_byte) { return array<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }; };
-		static optional<document<Stream>> fn_8_array(Stream&& s, byte) { return array<Stream>{ std::move(s), stream::read<uint8_t>(s) }; };
-		static optional<document<Stream>> fn_16_array(Stream&& s, byte) { return array<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }; };
-		static optional<document<Stream>> fn_32_array(Stream&& s, byte) { return array<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }; };
-		static optional<document<Stream>> fn_64_array(Stream&& s, byte) { return array<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }; };
-		static optional<document<Stream>> fn_null_terminated_array(Stream&& s, byte) { return array<Stream>{ std::move(s) }; };
+		static optional<document<Stream>> fn_small_array(Stream&& s, byte first_byte) { return document<Stream>(array<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }); };
+		static optional<document<Stream>> fn_8_array(Stream&& s, byte) { return document<Stream>(array<Stream>{ std::move(s), stream::read<uint8_t>(s) }); };
+		static optional<document<Stream>> fn_16_array(Stream&& s, byte) { return document<Stream>(array<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }); };
+		static optional<document<Stream>> fn_32_array(Stream&& s, byte) { return document<Stream>(array<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }); };
+		static optional<document<Stream>> fn_64_array(Stream&& s, byte) { return document<Stream>(array<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }); };
+		static optional<document<Stream>> fn_null_terminated_array(Stream&& s, byte) { return document<Stream>(array<Stream>{ std::move(s) }); };
 
-		static optional<document<Stream>> fn_small_map(Stream&& s, byte first_byte) { return map<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }; };
-		static optional<document<Stream>> fn_8_map(Stream&& s, byte) { return map<Stream>{ std::move(s), stream::read<uint8_t>(s) }; };
-		static optional<document<Stream>> fn_16_map(Stream&& s, byte) { return map<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }; };
-		static optional<document<Stream>> fn_32_map(Stream&& s, byte) { return map<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }; };
-		static optional<document<Stream>> fn_64_map(Stream&& s, byte) { return map<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }; };
-		static optional<document<Stream>> fn_null_terminated_map(Stream&& s, byte) { return map<Stream>{ std::move(s) }; };
+		static optional<document<Stream>> fn_small_map(Stream&& s, byte first_byte) { return document<Stream>(map<Stream>{ std::move(s), static_cast<uint8_t>(first_byte & 31) }); };
+		static optional<document<Stream>> fn_8_map(Stream&& s, byte) { return document<Stream>(map<Stream>{ std::move(s), stream::read<uint8_t>(s) }); };
+		static optional<document<Stream>> fn_16_map(Stream&& s, byte) { return document<Stream>(map<Stream>{ std::move(s), from_big_endian(stream::read<uint16_t>(s)) }); };
+		static optional<document<Stream>> fn_32_map(Stream&& s, byte) { return document<Stream>(map<Stream>{ std::move(s), from_big_endian(stream::read<uint32_t>(s)) }); };
+		static optional<document<Stream>> fn_64_map(Stream&& s, byte) { return document<Stream>(map<Stream>{ std::move(s), from_big_endian(stream::read<uint64_t>(s)) }); };
+		static optional<document<Stream>> fn_null_terminated_map(Stream&& s, byte) { return document<Stream>(map<Stream>{ std::move(s) }); };
 
 		static optional<document<Stream>> read(Stream&& s, byte first_byte)
 		{
