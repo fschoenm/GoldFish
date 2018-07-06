@@ -6,7 +6,7 @@
 #include "array_ref.h"
 #include "common.h"
 #include "match.h"
-#include "optional.h"
+#include <optional>
 
 namespace goldfish { namespace stream
 {
@@ -165,21 +165,21 @@ namespace goldfish { namespace stream
 		{
 			return read_helper<T>(std::integral_constant<size_t, alignof(T)>());
 		}
-		template <class T> std::enable_if_t<std::is_standard_layout<T>::value, optional<T>> peek()
+		template <class T> std::enable_if_t<std::is_standard_layout<T>::value, std::optional<T>> peek()
 		{
 			return peek_helper<T>(std::integral_constant<size_t, alignof(T)>());
 		}
 	private:
-		template <class T> optional<T> peek_helper(std::integral_constant<size_t, 1>)
+		template <class T> std::optional<T> peek_helper(std::integral_constant<size_t, 1>)
 		{
 			if (m_data.size() < sizeof(T))
-				return nullopt;
+				return std::nullopt;
 			return reinterpret_cast<const T&>(*m_data.data());
 		}
-		template <class T, size_t s> optional<T> peek_helper(std::integral_constant<size_t, s>)
+		template <class T, size_t s> std::optional<T> peek_helper(std::integral_constant<size_t, s>)
 		{
 			if (m_data.size() < sizeof(T))
-				return nullopt;
+				return std::nullopt;
 			T t;
 			memcpy(&t, m_data.data(), sizeof(t));
 			return t;

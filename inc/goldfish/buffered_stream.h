@@ -22,7 +22,7 @@ namespace goldfish { namespace stream
 		{
 			return read_helper<T>(std::integral_constant<size_t, alignof(T)>(), std::bool_constant<sizeof(T) <= N>());
 		}
-		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) <= N, optional<T>> peek()
+		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) <= N, std::optional<T>> peek()
 		{
 			return peek_helper<T>(std::integral_constant<size_t, alignof(T)>());
 		}
@@ -79,16 +79,16 @@ namespace goldfish { namespace stream
 			m_buffered.remove_front(sizeof(t));
 			return t;
 		}
-		template <class T> optional<T> peek_helper(std::integral_constant<size_t, 1>)
+		template <class T> std::optional<T> peek_helper(std::integral_constant<size_t, 1>)
 		{
 			if (m_buffered.size() < sizeof(T) && !try_fill_in_buffer_ensure_size(sizeof(T)))
-				return nullopt;
+				return std::nullopt;
 			return reinterpret_cast<T&>(*m_buffered.data());
 		}
-		template <class T, size_t alignment> optional<T> peek_helper(std::integral_constant<size_t, alignment>)
+		template <class T, size_t alignment> std::optional<T> peek_helper(std::integral_constant<size_t, alignment>)
 		{
 			if (m_buffered.size() < sizeof(T) && !try_fill_in_buffer_ensure_size(sizeof(T)))
-				return nullopt;
+				return std::nullopt;
 			T t;
 			memcpy(&t, m_buffered.data(), sizeof(t));
 			return t;

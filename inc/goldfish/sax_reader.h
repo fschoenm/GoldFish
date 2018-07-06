@@ -2,7 +2,7 @@
 
 #include "tags.h"
 #include "stream.h"
-#include "optional.h"
+#include <optional>
 #include "base64_stream.h"
 #include "buffered_stream.h"
 #include "schema.h"

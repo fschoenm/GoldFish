@@ -1,7 +1,7 @@
 #pragma once
 
 #include "array_ref.h"
-#include "optional.h"
+#include <optional>
 #include "tags.h"
 #include <vector>
 #include <algorithm>
@@ -22,37 +22,37 @@ namespace goldfish
 				: m_keys{ std::forward<Args>(args)... }
 			{}
 
-			optional<size_t> search_key(const_buffer_ref key, size_t start_index_in_schema) const
+			std::optional<size_t> search_key(const_buffer_ref key, size_t start_index_in_schema) const
 			{
 				return search_impl(key, start_index_in_schema);
 			}
-			template <class Document> std::enable_if_t<tags::has_tag<Document, tags::document>::value, optional<size_t>> search(Document& d, size_t start_index_in_schema) const
+			template <class Document> std::enable_if_t<tags::has_tag<Document, tags::document>::value, std::optional<size_t>> search(Document& d, size_t start_index_in_schema) const
 			{
 				return d.visit(first_match(
-					[&](auto& text, tags::string) -> optional<size_t>
+					[&](auto& text, tags::string) -> std::optional<size_t>
 					{
 						byte buffer[max_length];
 						auto length = read_full_buffer(text, buffer);
 						if (stream::seek(text, std::numeric_limits<uint64_t>::max()) != 0)
-							return nullopt;
+							return std::nullopt;
 
 						return search_impl({ buffer, length }, start_index_in_schema);
 					},
-					[&](auto&, auto) -> optional<size_t>
+					[&](auto&, auto) -> std::optional<size_t>
 					{
 						seek_to_end(d);
-						return nullopt; /*We currently only support text strings as keys*/
+						return std::nullopt; /*We currently only support text strings as keys*/
 					}));
 			}
 		private:
-			optional<size_t> search_impl(const_buffer_ref text, size_t start_index_in_schema) const
+			std::optional<size_t> search_impl(const_buffer_ref text, size_t start_index_in_schema) const
 			{
 				auto it = std::find_if(m_keys.begin() + start_index_in_schema, m_keys.end(), [&](auto&& key)
 				{
 					return key.size() == text.size() && std::equal(key.begin(), key.end(), make_unchecked_array_iterator(text.begin()));
 				});
 				if (it == m_keys.end())
-					return nullopt;
+					return std::nullopt;
 				else
 					return std::distance(m_keys.begin(), it);
 			}
@@ -75,7 +75,7 @@ namespace goldfish
 			: m_map(std::move(map))
 			, m_schema(schema)
 		{}
-		optional<decltype(std::declval<Map>().read_value())> read_by_schema_index(size_t index)
+		std::optional<decltype(std::declval<Map>().read_value())> read_by_schema_index(size_t index)
 		{
 			#ifndef NDEBUG
 			if (m_last_queried_index)
@@ -84,7 +84,7 @@ namespace goldfish
 			#endif
 
 			if (m_index > index)
-				return nullopt;
+				return std::nullopt;
 
 			if (m_on_value)
 			{
@@ -121,7 +121,7 @@ namespace goldfish
 					// Our key was not found (we found a key later in the list of keys)
 					// We are on the value of that later key
 					m_on_value = true;
-					return nullopt;
+					return std::nullopt;
 				}
 				else
 				{
@@ -134,7 +134,7 @@ namespace goldfish
 			// However, the user of our class has no way to know whether the nullopt that we return indicates that we reached the end
 			// of the map, or if it just means the key was not found. Relock the parent to ensure a call to seek_to_end is made
 			debug_checks::lock_parent(m_map);
-			return nullopt;
+			return std::nullopt;
 		}
 		template <class Key> auto read(Key&& key)
 		{

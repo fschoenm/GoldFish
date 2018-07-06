@@ -86,7 +86,7 @@ namespace goldfish { namespace debug_checks
 			, m_inner(std::move(inner))
 		{}
 
-		optional<decltype(add_read_checks_impl(static_cast<container_base<error_handler>*>(nullptr) /*parent*/, *std::declval<T>().read()))> read()
+		std::optional<decltype(add_read_checks_impl(static_cast<container_base<error_handler>*>(nullptr) /*parent*/, *std::declval<T>().read()))> read()
 		{
 			err_if_locked();
 
@@ -98,7 +98,7 @@ namespace goldfish { namespace debug_checks
 			else
 			{
 				unlock_parent();
-				return nullopt;
+				return std::nullopt;
 			}
 		}
 	private:
@@ -123,7 +123,7 @@ namespace goldfish { namespace debug_checks
 			, m_inner(std::move(inner))
 		{}
 
-		optional<decltype(add_read_checks_impl(static_cast<container_base<error_handler>*>(nullptr) /*parent*/, *std::declval<T>().read_key()))> read_key()
+		std::optional<decltype(add_read_checks_impl(static_cast<container_base<error_handler>*>(nullptr) /*parent*/, *std::declval<T>().read_key()))> read_key()
 		{
 			err_if_locked();
 			err_if_flag_set();
@@ -136,7 +136,7 @@ namespace goldfish { namespace debug_checks
 			else
 			{
 				unlock_parent();
-				return nullopt;
+				return std::nullopt;
 			}
 		}
 		auto read_value()

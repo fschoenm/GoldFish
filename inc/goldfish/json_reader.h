@@ -5,7 +5,7 @@
 #include "tags.h"
 #include "variant.h"
 #include "stream.h"
-#include "optional.h"
+#include <optional>
 #include "sax_reader.h"
 #include <cmath>
 
@@ -48,7 +48,7 @@ namespace goldfish { namespace json
 
 	namespace details
 	{
-		template <class Stream> optional<char> peek_non_space(Stream& s)
+		template <class Stream> std::optional<char> peek_non_space(Stream& s)
 		{
 			for (;;)
 			{
@@ -275,21 +275,21 @@ namespace goldfish { namespace json
 		comma_separated_reader(Stream&& s)
 			: m_stream(std::move(s))
 		{}
-		optional<document<stream::reader_ref_type_t<Stream>>> read_comma_separated()
+		std::optional<document<stream::reader_ref_type_t<Stream>>> read_comma_separated()
 		{
 			switch (m_state)
 			{
 				case state::first:
 				{
 					auto c = details::peek_non_space(m_stream);
-					if (c == nullopt)
+					if (c == std::nullopt)
 						throw stream::unexpected_end_of_stream{};
 
 					if (c == end_character)
 					{
 						stream::read<char>(m_stream);
 						m_state = state::ended;
-						return nullopt;
+						return std::nullopt;
 					}
 					else
 					{
@@ -303,13 +303,13 @@ namespace goldfish { namespace json
 					switch (details::read_non_space(m_stream))
 					{
 					case ',': return read_no_debug_check(stream::ref(m_stream));
-					case end_character: m_state = state::ended; return nullopt;
+					case end_character: m_state = state::ended; return std::nullopt;
 					default: throw ill_formatted_json_data{ "Invalid delimiter in JSON array or map" };
 					}
 				}
 
 				case state::ended:
-					return nullopt;
+					return std::nullopt;
 
 				default: std::terminate();
 			}
@@ -378,7 +378,7 @@ namespace goldfish { namespace json
 		for (;;)
 		{
 			auto c = s.template peek<char>();
-			if (c == nullopt || *c < '0' || *c > '9')
+			if (c == std::nullopt || *c < '0' || *c > '9')
 				return result;
 
 			if (result > (std::numeric_limits<uint64_t>::max() - (*c - '0')) / 10)
@@ -390,7 +390,7 @@ namespace goldfish { namespace json
 	template <class Stream> double read_decimals(Stream& s)
 	{
 		auto first = s.template peek<char>();
-		if (first == nullopt || *first < '0' || *first > '9')
+		if (first == std::nullopt || *first < '0' || *first > '9')
 			throw ill_formatted_json_data{ "Invalid digit in JSON integer" };
 
 		double result = 0;
@@ -398,7 +398,7 @@ namespace goldfish { namespace json
 		for (;;)
 		{
 			auto c = s.template peek<char>();
-			if (c == nullopt || *c < '0' || *c > '9')
+			if (c == std::nullopt || *c < '0' || *c > '9')
 				return result;
 
 			divider *= 10;
