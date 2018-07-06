@@ -33,7 +33,18 @@ namespace goldfish { namespace cbor
 		array<Stream>,
 		map<Stream>>
 	{
-		using document_impl::document_impl;
+		using document_impl<
+		false /*does_json_conversions*/,
+		bool,
+		nullptr_t,
+		uint64_t,
+		int64_t,
+		double,
+		undefined,
+		byte_string<Stream>,
+		text_string<Stream>,
+		array<Stream>,
+		map<Stream>>::document_impl;
 	};
 
 	// Read one document from the stream, or return nullopt for the null terminator (byte 0xFF)

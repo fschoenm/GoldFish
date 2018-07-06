@@ -31,7 +31,18 @@ namespace goldfish { namespace json
 		array<Stream>,
 		map<Stream>>
 	{
-		using document_impl::document_impl;
+		using document_impl<
+		true /*does_json_conversions*/,
+		bool,
+		nullptr_t,
+		uint64_t,
+		int64_t,
+		double,
+		undefined,
+		text_string<Stream>,
+		byte_string,
+		array<Stream>,
+		map<Stream>>::document_impl;
 	};
 	template <class Stream> document<std::decay_t<Stream>> read_no_debug_check(Stream&& s);
 
