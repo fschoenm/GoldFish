@@ -1,6 +1,5 @@
 #pragma once
 
-#include "match.h"
 #include "stream.h"
 #include "tags.h"
 #include <type_traits>
@@ -149,18 +148,19 @@ namespace goldfish { namespace sax
 
 		template <class T> auto write(T&& document, std::enable_if_t<std::is_same<typename std::decay_t<T>::tag, tags::document>::value>* = nullptr)
 		{
-			return document.visit(best_match(
-				[&](auto&& x, tags::binary) { return write(x); },
-				[&](auto&& x, tags::string) { return copy(x, [&](size_t cb) { return start_string(cb); }, [&] { return start_string(); }); },
-				[&](auto&& x, tags::array)
-				{
+			return document.visit([&](auto&& x) {
+				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::binary>) { return write(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>) {
+					auto t = const_cast<std::remove_const_t<decltype(this)>>(this); //?!?
+			 		return copy(x, [&](size_t cb) { return t->start_string(cb); }, [&] { return t->start_string(); });
+				}
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::array>) {
 					auto array_writer = start_array();
 					while (auto element = x.read())
 						array_writer.write(*element);
 					return array_writer.flush();
-				},
-				[&](auto&& x, tags::map)
-				{
+				}
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::map>) {
 					auto map_writer = start_map();
 					while (auto key = x.read_key())
 					{
@@ -168,14 +168,11 @@ namespace goldfish { namespace sax
 						map_writer.write_value(x.read_value());
 					}
 					return map_writer.flush();
-				},
-				[&](auto&& x, tags::undefined) { return write(x); },
-				[&](auto&& x, tags::floating_point) { return write(x); },
-				[&](auto&& x, tags::unsigned_int) { return write(x); },
-				[&](auto&& x, tags::signed_int) { return write(x); },
-				[&](auto&& x, tags::boolean) { return write(x); },
-				[&](auto&& x, tags::null) { return write(x); }
-			));
+				}
+				else {
+					 return write(x);
+				}
+			});
 		}
 
 		template <class T> decltype(serialize_to_goldfish(std::declval<document_writer<inner>&>(), std::declval<T&&>())) write(T&& t)

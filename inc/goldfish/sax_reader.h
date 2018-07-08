@@ -5,12 +5,16 @@
 #include <optional>
 #include "base64_stream.h"
 #include "buffered_stream.h"
-#include "schema.h"
 #include <type_traits>
 #include <variant>
 
 namespace goldfish
 {
+	namespace json 
+	{
+		struct ill_formatted_json_data;
+		template <class Stream> std::variant<uint64_t, int64_t, double> read_number(Stream& s, char first);
+	}
 	struct integer_overflow_while_casting : exception { integer_overflow_while_casting() : exception("Integer too large") {} };
 
 	template <bool _does_json_conversions, class... types>
@@ -28,18 +32,12 @@ namespace goldfish
 		template <class Lambda> decltype(auto) visit(Lambda&& l) &
 		{
 			assert(!m_moved_from);
-			return m_data.visit([&](auto& x) -> decltype(auto)
-			{
-				return l(x, tags::get_tag(x));
-			});
+			return std::visit(l, m_data);
 		}
 		template <class Lambda> decltype(auto) visit(Lambda&& l) &&
 		{
 			assert(!m_moved_from);
-			return std::move(m_data).visit([&](auto&& x) -> decltype(auto)
-			{
-				return l(std::forward<decltype(x)>(x), tags::get_tag(x));
-			});
+			return std::visit(l, std::move(m_data));
 		}
 		auto as_string()
 		{
@@ -47,7 +45,7 @@ namespace goldfish
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(m_data).as<type_with_tag_t<tags::string>>();
+			return std::move(std::get<type_with_tag_t<tags::string>>(m_data));
 		}
 		auto as_binary() { return as_binary(std::integral_constant<bool, does_json_conversions>()); }
 		auto as_array()
@@ -56,7 +54,7 @@ namespace goldfish
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(m_data).as<type_with_tag_t<tags::array>>();
+			return std::move(std::get<type_with_tag_t<tags::array>>(m_data));
 		}
 		auto as_map()
 		{
@@ -64,32 +62,30 @@ namespace goldfish
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(m_data).as<type_with_tag_t<tags::map>>();
-		}
-		template <class FirstKey, class... OtherKeys> auto as_map(FirstKey&& first_key, OtherKeys&&... other_keys)
-		{
-			return apply_schema(as_map(), make_schema(std::forward<FirstKey>(first_key), std::forward<OtherKeys>(other_keys)...));
+			return std::move(std::get<type_with_tag_t<tags::map>>(m_data));
 		}
 		template <class... Args> auto as_object(Args&&... args) { return as_map(std::forward<Args>(args)...); }
 
 		// Floating point can be converted from an int
-		auto as_double()
+		double as_double()
 		{
 			assert(!m_moved_from);
-			auto result = visit(first_match(
-				[](double x, tags::floating_point) { return x; },
-				[](auto&& x, tags::unsigned_int) { return static_cast<double>(x); },
-				[](auto&& x, tags::signed_int) { return static_cast<double>(x); },
-				[](auto&& x, tags::string)
+			double result = std::visit([&](auto&& arg) -> double {
+				using Ti = std::decay_t<decltype(arg)>;
+				auto& x = const_cast<Ti&>(arg);
+				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::floating_point>) { return x; }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::unsigned_int>) { return static_cast<double>(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::signed_int>) { return static_cast<double>(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
 				{
-					// We need to buffer the stream because read_number uses "peek<char>"
-					auto s = stream::buffer<1>(stream::ref(x));
-					try
-					{
-						auto result = json::read_number(s, stream::read<char>(s)).visit([](auto&& x) -> double { return static_cast<double>(x); });
-						if (stream::seek(s, 1) != 0)
-							throw bad_variant_access{};
-						return result;
+ 					// We need to buffer the stream because read_number uses "peek<char>"
+ 					auto s = stream::buffer<1>(stream::ref(x));
+ 					try
+ 					{
+						double result = std::visit([](auto&& x) -> double { return static_cast<double>(x); }, json::read_number(s, stream::read<char>(s)));
+ 						if (stream::seek(s, 1) != 0)
+ 							throw bad_variant_access{};
+ 						return result;
 					}
 					catch (const json::ill_formatted_json_data&)
 					{
@@ -99,9 +95,12 @@ namespace goldfish
 					{
 						throw bad_variant_access{};
 					}
-				},
-				[](auto&&, auto) -> double { throw bad_variant_access{}; }
-			));
+ 				}
+				else
+				{
+					throw bad_variant_access{};
+				}
+			}, m_data);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
@@ -112,20 +111,23 @@ namespace goldfish
 		uint64_t as_uint64()
 		{
 			assert(!m_moved_from);
-			auto result = visit(first_match(
-				[](auto&& x, tags::unsigned_int) { return x; },
-				[](auto&& x, tags::signed_int) { return cast_signed_to_unsigned(x); },
-				[](auto&& x, tags::floating_point) { return cast_double_to_unsigned(x); },
-				[](auto&& x, tags::string)
+			uint64_t result = std::visit([](auto&& x) -> uint64_t {
+				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::unsigned_int>) { return x; }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::signed_int>) { return cast_signed_to_unsigned(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::floating_point>) { return cast_double_to_unsigned(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
 				{
 					// We need to buffer the stream because read_number uses "peek<char>"
 					auto s = stream::buffer<1>(stream::ref(x));
 					try
 					{
-						auto result = json::read_number(s, stream::read<char>(s)).visit(best_match(
-							[](uint64_t x) { return x; },
-							[](int64_t x) { return cast_signed_to_unsigned(x); },
-							[](double x) { return cast_double_to_unsigned(x); }));
+						uint64_t result = std::visit([](auto&& arg) -> uint64_t
+						{
+							using Ti = std::decay_t<decltype(arg)>;
+							if constexpr (std::is_same_v<Ti, uint64_t>) { return arg; }
+							else if constexpr (std::is_same_v<Ti, int64_t>) { return cast_signed_to_unsigned(arg); }
+							else if constexpr (std::is_same_v<Ti, double>) { return cast_double_to_unsigned(arg); }
+						}, json::read_number(s, stream::read<char>(s)));
 						if (stream::seek(s, 1) != 0)
 							throw bad_variant_access{};
 						return result;
@@ -138,9 +140,12 @@ namespace goldfish
 					{
 						throw bad_variant_access{};
 					}
-				},
-				[](auto&&, auto) -> uint64_t { throw bad_variant_access{}; }
-			));
+				}
+				else
+				{
+					throw bad_variant_access{};
+				}
+			}, m_data);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
@@ -172,21 +177,23 @@ namespace goldfish
 		int64_t as_int64()
 		{
 			assert(!m_moved_from);
-			auto result = visit(first_match(
-				[](auto&& x, tags::signed_int) { return x; },
-				[](auto&& x, tags::unsigned_int) { return cast_unsigned_to_signed(x); },
-				[](auto&& x, tags::floating_point) { return cast_double_to_signed(x); },
-				[](auto&& x, tags::string)
+			int64_t result = std::visit([](auto&& x) -> int64_t {
+				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::signed_int>) { return x; }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::unsigned_int>) { return cast_unsigned_to_signed(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::floating_point>) { return cast_double_to_signed(x); }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
 				{
 					// We need to buffer the stream because read_number uses "peek<char>"
 					auto s = stream::buffer<1>(stream::ref(x));
 					try
 					{
-						auto result = json::read_number(s, stream::read<char>(s)).visit(best_match(
-							[](int64_t x) { return x; },
-							[](uint64_t x) { return cast_unsigned_to_signed(x); },
-							[](double x) { return cast_double_to_signed(x); }
-						));
+						uint64_t result = std::visit([](auto&& arg) -> uint64_t
+						{
+							using Ti = std::decay_t<decltype(arg)>;
+							if constexpr (std::is_same_v<Ti, int64_t>) { return arg; }
+							else if constexpr (std::is_same_v<Ti, uint64_t>) { return cast_unsigned_to_signed(arg); }
+							else if constexpr (std::is_same_v<Ti, double>) { return cast_double_to_signed(arg); }
+						}, json::read_number(s, stream::read<char>(s)));
 						if (stream::seek(s, 1) != 0)
 							throw bad_variant_access{};
 						return result;
@@ -197,11 +204,14 @@ namespace goldfish
 					}
 					catch (const stream::unexpected_end_of_stream&)
 					{
-						throw bad_variant_access{};
+					 	throw bad_variant_access{};
 					}
-				},
-				[](auto&&, auto) -> int64_t { throw bad_variant_access{}; }
-			));
+				}
+				else
+				{
+					throw bad_variant_access{};
+				}
+			}, m_data);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
@@ -229,12 +239,12 @@ namespace goldfish
 			return static_cast<int8_t>(x);
 		}
 
-		auto as_bool()
+		bool as_bool()
 		{
 			assert(!m_moved_from);
-			auto result = visit(first_match(
-				[](auto&& x, tags::boolean) { return x; },
-				[](auto&& x, tags::string)
+			bool result = std::visit([](auto&& x) -> bool{
+				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::boolean>) { return x; }
+				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
 				{
 					byte buffer[6];
 					auto cb = read_full_buffer(x, buffer);
@@ -244,25 +254,25 @@ namespace goldfish
 						return false;
 					else
 						throw bad_variant_access{};
-				},
-				[](auto&&, auto) -> bool { throw bad_variant_access{}; }
-			));
+				}
+				else
+				{
+					throw bad_variant_access{};
+				}
+			}, m_data);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
 			return result;
 		}
-		bool is_undefined_or_null() const { return m_data.is<undefined>() || m_data.is<nullptr_t>(); }
-		bool is_null() const { return m_data.is<nullptr_t>(); }
+		bool is_undefined_or_null() const { return std::holds_alternative<undefined>(m_data) || std::holds_alternative<nullptr_t>(m_data); }
+		bool is_null() const { return std::holds_alternative<nullptr_t>(m_data); }
 
-		template <class tag> bool is_exactly() { return m_data.is<type_with_tag_t<tag>>(); }
+		template <class tag> bool is_exactly() { return std::holds_alternative<type_with_tag_t<tag>>(m_data); }
 
-		#ifdef NDEBUG
-		using invalid_state = typename variant<types...>::invalid_state;
-		#endif
 	private:
 		auto as_binary(std::true_type /*does_json_conversion*/) { return stream::decode_base64(as_string()); }
-		auto as_binary(std::false_type /*does_json_conversion*/) { return std::move(m_data).as<type_with_tag_t<tags::binary>>(); }
+		auto as_binary(std::false_type /*does_json_conversion*/) { return std::move(std::get<type_with_tag_t<tags::binary>>(m_data)); }
 
 		static uint64_t cast_signed_to_unsigned(int64_t x)
 		{
@@ -294,12 +304,28 @@ namespace goldfish
 		#ifndef NDEBUG
 		bool m_moved_from = false;
 		#endif
-		variant<types...> m_data;
+		std::variant<types...> m_data;
 	};
 
 	template <class Document> std::enable_if_t<tags::has_tag<std::decay_t<Document>, tags::document>::value, void> seek_to_end(Document&& d)
 	{
-		d.visit([&](auto&& x, auto) { seek_to_end(std::forward<decltype(x)>(x)); });
+		d.visit([&](auto&& x) {
+			if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::binary>) { stream::seek(x, std::numeric_limits<uint64_t>::max()); }
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>) { stream::seek(x, std::numeric_limits<uint64_t>::max()); }
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::array>)
+			{
+				while (auto d = x.read())
+					seek_to_end(*d);
+			}
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::map>)
+			{
+				while (auto d = x.read_key())
+				{
+					seek_to_end(*d);
+					seek_to_end(x.read_value());
+				}
+			}
+		});
 	}
 	template <class type> std::enable_if_t<tags::has_tag<std::decay_t<type>, tags::undefined>::value, void> seek_to_end(type&&) {}
 	template <class type> std::enable_if_t<tags::has_tag<std::decay_t<type>, tags::floating_point>::value, void> seek_to_end(type&&) {}

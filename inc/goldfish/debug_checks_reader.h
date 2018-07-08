@@ -153,27 +153,28 @@ namespace goldfish { namespace debug_checks
 
 	template <class error_handler, class Document> document<error_handler, std::decay_t<Document>> add_read_checks_impl(container_base<error_handler>* parent, Document&& t)
 	{
-		return std::forward<Document>(t).visit(first_match(
-			[&](auto&& x, tags::map) -> document<error_handler, std::decay_t<Document>>
+		return std::forward<Document>(t).visit([&](auto&& x) -> document<error_handler, std::decay_t<Document>> {
+			if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::map>)
 			{
 				return make_map<error_handler>(parent, std::forward<decltype(x)>(x));
-			},
-			[&](auto&& x, tags::array) -> document<error_handler, std::decay_t<Document>>
+			}
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::array>)
 			{
 				return make_array<error_handler>(parent, std::forward<decltype(x)>(x));
-			},
-			[&](auto&& x, tags::binary) -> document<error_handler, std::decay_t<Document>>
+			}
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::binary>)
 			{
 				return make_string<error_handler, tags::binary>(parent, std::forward<decltype(x)>(x));
-			},
-			[&](auto&& x, tags::string) -> document<error_handler, std::decay_t<Document>>
+			}
+			else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
 			{
 				return make_string<error_handler, tags::string>(parent, std::forward<decltype(x)>(x));
-			},
-			[](auto&& x, auto) -> document<error_handler, std::decay_t<Document>>
+			}
+			else
 			{
 				return std::forward<decltype(x)>(x);
-			}));
+			}
+		});
 	}
 
 	template <class error_handler, class Document> auto add_read_checks(Document&& t, error_handler)

@@ -5,7 +5,6 @@
 #include <vector>
 #include "array_ref.h"
 #include "common.h"
-#include "match.h"
 #include <optional>
 
 namespace goldfish { namespace stream

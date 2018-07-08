@@ -3,7 +3,7 @@
 #include "base64_stream.h"
 #include "debug_checks_reader.h"
 #include "tags.h"
-#include "variant.h"
+#include <variant>
 #include "stream.h"
 #include <optional>
 #include "sax_reader.h"
@@ -406,7 +406,7 @@ namespace goldfish { namespace json
 			stream::read<char>(s);
 		}
 	}
-	template <class Stream> variant<uint64_t, int64_t, double> read_number(Stream& s, char first)
+	template <class Stream> std::variant<uint64_t, int64_t, double> read_number(Stream& s, char first)
 	{
 		bool negative = false;
 		if (first == '-')
@@ -476,7 +476,7 @@ namespace goldfish { namespace json
 			case '"': return text_string<std::decay_t<Stream>>{ std::forward<Stream>(s) };
 			case '-':
 			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-				return read_number(s, c).visit([](auto&& x) -> document<Stream> { return x; });
+				return std::visit([&](auto&& x) -> document<Stream> {  return x; }, read_number(s, c));
 
 			default: throw ill_formatted_json_data{ "Invalid first character for JSON document" };
 		}
