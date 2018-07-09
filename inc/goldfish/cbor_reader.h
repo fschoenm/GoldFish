@@ -18,6 +18,7 @@ namespace goldfish { namespace cbor
 	template <class Stream> using text_string = string<Stream, 3, tags::string>;
 	template <class Stream> class array;
 	template <class Stream> class map;
+	template <class Stream> uint64_t read_integer(byte, Stream&);
 
 	template <class Stream> struct document : document_impl<
 		false /*does_json_conversions*/,
