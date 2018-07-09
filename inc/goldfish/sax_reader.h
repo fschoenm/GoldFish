@@ -121,13 +121,11 @@ namespace goldfish
 					auto s = stream::buffer<1>(stream::ref(x));
 					try
 					{
-						uint64_t result = std::visit([](auto&& arg) -> uint64_t
-						{
-							using Ti = std::decay_t<decltype(arg)>;
-							if constexpr (std::is_same_v<Ti, uint64_t>) { return arg; }
-							else if constexpr (std::is_same_v<Ti, int64_t>) { return cast_signed_to_unsigned(arg); }
-							else if constexpr (std::is_same_v<Ti, double>) { return cast_double_to_unsigned(arg); }
-						}, json::read_number(s, stream::read<char>(s)));
+						auto num = json::read_number(s, stream::read<char>(s));
+						uint64_t result;
+						if (std::holds_alternative<uint64_t>(num)) { result = std::get<int64_t>(num); }
+						else if (std::holds_alternative<int64_t>(num)) { result = cast_signed_to_unsigned(std::get<int64_t>(num)); }
+						else if (std::holds_alternative<double>(num)) { result = cast_double_to_unsigned(std::get<double>(num)); }
 						if (stream::seek(s, 1) != 0)
 							throw bad_variant_access{};
 						return result;
@@ -187,13 +185,11 @@ namespace goldfish
 					auto s = stream::buffer<1>(stream::ref(x));
 					try
 					{
-						uint64_t result = std::visit([](auto&& arg) -> uint64_t
-						{
-							using Ti = std::decay_t<decltype(arg)>;
-							if constexpr (std::is_same_v<Ti, int64_t>) { return arg; }
-							else if constexpr (std::is_same_v<Ti, uint64_t>) { return cast_unsigned_to_signed(arg); }
-							else if constexpr (std::is_same_v<Ti, double>) { return cast_double_to_signed(arg); }
-						}, json::read_number(s, stream::read<char>(s)));
+						auto num = json::read_number(s, stream::read<char>(s));
+						int64_t result;
+						if (std::holds_alternative<int64_t>(num)) { result = std::get<int64_t>(num); }
+						else if (std::holds_alternative<uint64_t>(num)) { result = cast_unsigned_to_signed(std::get<uint64_t>(num)); }
+						else if (std::holds_alternative<double>(num)) { result = cast_double_to_signed(std::get<double>(num)); }
 						if (stream::seek(s, 1) != 0)
 							throw bad_variant_access{};
 						return result;
