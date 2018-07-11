@@ -261,7 +261,7 @@ A document reader offers the following APIs:
 * `as_map(...)`, `as_object(...)`: if parameters are specified to `as_map` or `as_object`, a `map reader with schema` object is returned. This allows for simpler parsing of documents when the keys and their order is known in advance.
 * `as_double`:
 	* if the document is an integer or a floating point (for example `1`, `-1` or `1.0` in JSON), return a double that represents the value of the document.
-	* Strings are parsed, which means the JSON document `"8000"` can be read as either the text `8000` using as_text, the text `óM4` using as_binary, the double `8000`, the signed integer `8000` or the unsigned integer `8000`
+	* Strings are parsed, which means the JSON document `"8000"` can be read as either the text `8000` using as_text, the text `ï¿½M4` using as_binary, the double `8000`, the signed integer `8000` or the unsigned integer `8000`
 	* otherwise, `goldfish::bad_variant_access` is thrown
 * `as_uint64`, `as_uint32`, `as_uint16`, `as_uint8`:
 	* if the document is a positive integer (for example `1` in JSON), return an integer that represents the value of the document
@@ -297,7 +297,7 @@ struct my_handler
 	const char* operator()(uint64_t, tags::unsigned_int) { return "uint"; }
 	const char* operator()(int64_t, tags::signed_int) { return "int"; }
 	const char* operator()(bool, tags::boolean) { return "bool"; }
-	const char* operator()(nullptr_t, tags::null) { return "null"; }
+	const char* operator()(std::nullptr_t, tags::null) { return "null"; }
 };
 int main()
 {
@@ -327,7 +327,7 @@ int main()
 		[](uint64_t, tags::unsigned_int) { return "uint"; },
 		[](int64_t, tags::signed_int) { return "int"; },
 		[](bool, tags::boolean) { return "bool"; },
-		[](nullptr_t, tags::null) { return "null"; }
+		[](std::nullptr_t, tags::null) { return "null"; }
 	));
 	// outputs "bool"
 }

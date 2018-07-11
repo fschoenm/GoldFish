@@ -261,8 +261,8 @@ namespace goldfish
 			#endif
 			return result;
 		}
-		bool is_undefined_or_null() const { return std::holds_alternative<undefined>(m_data) || std::holds_alternative<nullptr_t>(m_data); }
-		bool is_null() const { return std::holds_alternative<nullptr_t>(m_data); }
+		bool is_undefined_or_null() const { return std::holds_alternative<undefined>(m_data) || std::holds_alternative<std::nullptr_t>(m_data); }
+		bool is_null() const { return std::holds_alternative<std::nullptr_t>(m_data); }
 
 		template <class tag> bool is_exactly() { return std::holds_alternative<type_with_tag_t<tag>>(m_data); }
 

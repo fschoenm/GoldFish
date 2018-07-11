@@ -23,7 +23,7 @@ namespace goldfish { namespace cbor
 	template <class Stream> struct document : document_impl<
 		false /*does_json_conversions*/,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,
@@ -36,7 +36,7 @@ namespace goldfish { namespace cbor
 		using document_impl<
 		false /*does_json_conversions*/,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,

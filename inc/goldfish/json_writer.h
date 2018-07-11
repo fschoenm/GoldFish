@@ -209,7 +209,7 @@ namespace goldfish { namespace json
 			else   m_stream.write_buffer(string_literal_to_non_null_terminated_buffer("\"false\""));
 			return m_stream.flush();
 		}
-		auto write(nullptr_t)
+		auto write(std::nullptr_t)
 		{
 			m_stream.write_buffer(string_literal_to_non_null_terminated_buffer("\"null\""));
 			return m_stream.flush();
@@ -266,7 +266,7 @@ namespace goldfish { namespace json
 			else   m_stream.write_buffer({ reinterpret_cast<const byte*>("false"), 5 });
 			return m_stream.flush();
 		}
-		auto write(nullptr_t)
+		auto write(std::nullptr_t)
 		{
 			m_stream.write_buffer({ reinterpret_cast<const byte*>("null"), 4 });
 			return m_stream.flush();

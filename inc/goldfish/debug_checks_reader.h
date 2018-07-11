@@ -15,7 +15,7 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class Document> struct document : document_impl<
 		Document::does_json_conversions,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,
@@ -28,7 +28,7 @@ namespace goldfish { namespace debug_checks
 		using document_impl<
 		Document::does_json_conversions,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,

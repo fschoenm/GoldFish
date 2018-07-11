@@ -121,7 +121,7 @@ struct my_handler
 	const char* operator()(uint64_t, goldfish::tags::unsigned_int) { return "uint"; }
 	const char* operator()(int64_t, goldfish::tags::signed_int) { return "int"; }
 	const char* operator()(bool, goldfish::tags::boolean) { return "bool"; }
-	const char* operator()(nullptr_t, goldfish::tags::null) { return "null"; }
+	const char* operator()(std::nullptr_t, goldfish::tags::null) { return "null"; }
 };
 
 TEST_CASE(test_visit)
@@ -144,7 +144,7 @@ TEST_CASE(test_visit_with_best_match)
 		[](uint64_t, tags::unsigned_int) { return "uint"; },
 		[](int64_t, tags::signed_int) { return "int"; },
 		[](bool, tags::boolean) { return "bool"; },
-		[](nullptr_t, tags::null) { return "null"; }
+		[](std::nullptr_t, tags::null) { return "null"; }
 	)) == "bool");
 }
 

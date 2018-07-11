@@ -78,7 +78,7 @@ namespace goldfish { namespace cbor
 			else   stream::write(m_stream, static_cast<byte>((7 << 5) | 20));
 			return m_stream.flush();
 		}
-		auto write(nullptr_t)
+		auto write(std::nullptr_t)
 		{
 			stream::write(m_stream, static_cast<byte>((7 << 5) | 22));
 			return m_stream.flush();

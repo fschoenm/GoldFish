@@ -101,7 +101,7 @@ namespace goldfish { namespace sax
 		{}
 
 		auto write(bool x)       { return m_writer.write(x); }
-		auto write(nullptr_t x)  { return m_writer.write(x); }
+		auto write(std::nullptr_t x)  { return m_writer.write(x); }
 		auto write(double x)     { return m_writer.write(x); }
 		auto write(undefined x)  { return m_writer.write(x); }
 

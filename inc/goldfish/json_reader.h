@@ -21,7 +21,7 @@ namespace goldfish { namespace json
 	template <class Stream> struct document : document_impl<
 		true /*does_json_conversions*/,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,
@@ -34,7 +34,7 @@ namespace goldfish { namespace json
 		using document_impl<
 		true /*does_json_conversions*/,
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		uint64_t,
 		int64_t,
 		double,

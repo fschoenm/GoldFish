@@ -13,10 +13,10 @@ namespace goldfish { namespace dom
 	using array = std::vector<document>;
 	using map = std::vector<std::pair<document, document>>;
 
-	using map_key = variant<bool, nullptr_t, uint64_t, int64_t, double, std::vector<byte>, std::string>;
+	using map_key = variant<bool, std::nullptr_t, uint64_t, int64_t, double, std::vector<byte>, std::string>;
 	using document_variant = variant<
 		bool,
-		nullptr_t,
+		std::nullptr_t,
 		undefined,
 		uint64_t,
 		int64_t,
@@ -53,7 +53,7 @@ namespace goldfish { namespace dom
 	{
 		return document.visit(best_match(
 			[&](bool x) { return writer.write(x); },
-			[&](nullptr_t x) { return writer.write(x); },
+			[&](std::nullptr_t x) { return writer.write(x); },
 			[&](undefined x) { return writer.write(x); },
 			[&](uint64_t x) { return writer.write(x); },
 			[&](int64_t x) { return writer.write(x); },
