@@ -11,7 +11,6 @@
 
 namespace goldfish { namespace json
 {
-	struct ill_formatted_json_data : ill_formatted { using ill_formatted::ill_formatted; };
 	struct integer_overflow_in_json : ill_formatted_json_data { using ill_formatted_json_data::ill_formatted_json_data; };
 
 	class byte_string;
