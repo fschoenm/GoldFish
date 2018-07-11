@@ -186,7 +186,7 @@ namespace goldfish
 					try
 					{
 						auto num = json::read_number(s, stream::read<char>(s));
-						int64_t result;
+						int64_t result = 0;
 						if (std::holds_alternative<int64_t>(num)) { result = std::get<int64_t>(num); }
 						else if (std::holds_alternative<uint64_t>(num)) { result = cast_unsigned_to_signed(std::get<uint64_t>(num)); }
 						else if (std::holds_alternative<double>(num)) { result = cast_double_to_signed(std::get<double>(num)); }
