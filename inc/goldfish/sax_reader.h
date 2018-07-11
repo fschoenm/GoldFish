@@ -84,21 +84,21 @@ namespace goldfish
  					{
 						double result = std::visit([](auto&& x) -> double { return static_cast<double>(x); }, json::read_number(s, stream::read<char>(s)));
  						if (stream::seek(s, 1) != 0)
- 							throw bad_variant_access{};
+ 							throw std::bad_variant_access{};
  						return result;
 					}
 					catch (const json::ill_formatted_json_data&)
 					{
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 					}
 					catch (const stream::unexpected_end_of_stream&)
 					{
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 					}
  				}
 				else
 				{
-					throw bad_variant_access{};
+					throw std::bad_variant_access{};
 				}
 			}, m_data);
 			#ifndef NDEBUG
@@ -127,21 +127,21 @@ namespace goldfish
 						else if (std::holds_alternative<int64_t>(num)) { result = cast_signed_to_unsigned(std::get<int64_t>(num)); }
 						else if (std::holds_alternative<double>(num)) { result = cast_double_to_unsigned(std::get<double>(num)); }
 						if (stream::seek(s, 1) != 0)
-							throw bad_variant_access{};
+							throw std::bad_variant_access{};
 						return result;
 					}
 					catch (const json::ill_formatted_json_data&)
 					{
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 					}
 					catch (const stream::unexpected_end_of_stream&)
 					{
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 					}
 				}
 				else
 				{
-					throw bad_variant_access{};
+					throw std::bad_variant_access{};
 				}
 			}, m_data);
 			#ifndef NDEBUG
@@ -191,21 +191,21 @@ namespace goldfish
 						else if (std::holds_alternative<uint64_t>(num)) { result = cast_unsigned_to_signed(std::get<uint64_t>(num)); }
 						else if (std::holds_alternative<double>(num)) { result = cast_double_to_signed(std::get<double>(num)); }
 						if (stream::seek(s, 1) != 0)
-							throw bad_variant_access{};
+							throw std::bad_variant_access{};
 						return result;
 					}
 					catch (const json::ill_formatted_json_data&)
 					{
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 					}
 					catch (const stream::unexpected_end_of_stream&)
 					{
-					 	throw bad_variant_access{};
+					 	throw std::bad_variant_access{};
 					}
 				}
 				else
 				{
-					throw bad_variant_access{};
+					throw std::bad_variant_access{};
 				}
 			}, m_data);
 			#ifndef NDEBUG
@@ -249,11 +249,11 @@ namespace goldfish
 					else if (cb == 5 && std::equal(buffer, buffer + 5, "false"))
 						return false;
 					else
-						throw bad_variant_access{};
+						throw std::bad_variant_access{};
 				}
 				else
 				{
-					throw bad_variant_access{};
+					throw std::bad_variant_access{};
 				}
 			}, m_data);
 			#ifndef NDEBUG

@@ -50,8 +50,6 @@ namespace goldfish
 		int error_code;
 	};
 
-	struct bad_variant_access : exception { bad_variant_access() : exception("Bad variant access") {} };
-
 	// CBOR supports an "undefined" type, which is represented at runtime by the C++ type below
 	struct undefined {};
 	inline bool operator == (const undefined&, const undefined&) { return true; }
