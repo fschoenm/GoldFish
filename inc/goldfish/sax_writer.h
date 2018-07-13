@@ -3,6 +3,7 @@
 #include "stream.h"
 #include "tags.h"
 #include <type_traits>
+#include <string_view>
 
 namespace goldfish { namespace sax
 {
@@ -44,7 +45,7 @@ namespace goldfish { namespace sax
 		auto append_value() { return make_writer(m_writer.append_value()); }
 
 		// Write the key, don't start the value
-		template <class T> void write_key(T&& t) { append_key().write(std::forward<T>(t)); }
+		void write_key(const std::string_view& t) { append_key().write(t); }
 		auto start_binary_key(uint64_t cb) { return append_key().start_binary(cb); }
 		auto start_binary_key() { return append_key().start_binary(); }
 		auto start_string_key(uint64_t cb) { return append_key().start_string(cb); }
@@ -81,9 +82,9 @@ namespace goldfish { namespace sax
 		template <class T> auto start_map(T&& key) { write_key(std::forward<T>(key)); return start_map_value(); }
 
 		// Write both the key and the value
-		template <class T, class U> void write(T&& key, U&& value)
+		template <class U> void write(const std::string_view& key, U&& value)
 		{
-			write_key(std::forward<T>(key));
+			write_key(key);
 			write_value(std::forward<U>(value));
 		}
 
@@ -126,13 +127,17 @@ namespace goldfish { namespace sax
 
 		auto start_string(uint64_t cb) { return m_writer.start_string(cb); }
 		auto start_string() { return m_writer.start_string(); }
-		auto write(const char* text) { return write(text, strlen(text)); }
-		auto write(const std::string& text) { return write(text.data(), text.size()); }
 		template <size_t N> auto write(const char(&text)[N])
 		{
 			static_assert(N > 0, "Expect null terminated strings");
 			assert(text[N - 1] == 0);
-			return write(text, N - 1);
+			return write({ text, N - 1 });
+		}
+		auto write(const std::string_view& text)
+		{
+			auto stream = start_string(text.size());
+			stream.write_buffer({ reinterpret_cast<const byte*>(text.data()), text.size() });
+			return stream.flush();
 		}
 
 		auto start_array(uint64_t size) { return make_array_writer(m_writer.start_array(size)); }
@@ -202,12 +207,6 @@ namespace goldfish { namespace sax
 			}
 		}
 
-		auto write(const char* text, size_t length)
-		{
-			auto stream = start_string(length);
-			stream.write_buffer({ reinterpret_cast<const byte*>(text), length });
-			return stream.flush();
-		}
 		inner m_writer;
 	};
 
