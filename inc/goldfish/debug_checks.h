@@ -6,7 +6,9 @@
 
 namespace goldfish { namespace debug_checks
 {
-	struct no_check {};
+	struct no_check {
+		static void on_error() {}
+	};
 	struct terminate_on_error
 	{
 		static void on_error() { std::terminate(); }
