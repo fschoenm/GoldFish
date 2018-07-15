@@ -20,31 +20,22 @@ namespace goldfish { namespace cbor
 	template <class Stream> class map;
 	template <class Stream> uint64_t read_integer(byte, Stream&);
 
-	template <class Stream> struct document : document_impl<
-		false /*does_json_conversions*/,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		byte_string<Stream>,
-		text_string<Stream>,
-		array<Stream>,
-		map<Stream>>
+	template <class Stream>
+	struct DocTraits {
+		using VariantT = std::variant<bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			byte_string<Stream>, text_string<Stream>, array<Stream>, map<Stream>>;
+
+		template <class tag>
+		using type_with_tag_t = ::goldfish::tags::type_with_tag_t<tag,
+			bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			byte_string<Stream>, text_string<Stream>, array<Stream>, map<Stream>>;
+
+		static constexpr bool does_json_conversions = false;
+	};
+
+	template <class Stream> struct document : document_impl<DocTraits<Stream>>
 	{
-		using document_impl<
-		false /*does_json_conversions*/,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		byte_string<Stream>,
-		text_string<Stream>,
-		array<Stream>,
-		map<Stream>>::document_impl;
+		using document_impl<DocTraits<Stream>>::document_impl;
 	};
 
 	// Read one document from the stream, or return nullopt for the null terminator (byte 0xFF)
