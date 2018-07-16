@@ -42,7 +42,7 @@ namespace goldfish
 		auto as_string()
 		{
 			assert(!m_moved_from);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return std::move(std::get<type_with_tag_t<tags::string>>(m_data));
@@ -51,7 +51,7 @@ namespace goldfish
 		auto as_array()
 		{
 			assert(!m_moved_from);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return std::move(std::get<type_with_tag_t<tags::array>>(m_data));
@@ -59,7 +59,7 @@ namespace goldfish
 		auto as_map()
 		{
 			assert(!m_moved_from);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return std::move(std::get<type_with_tag_t<tags::map>>(m_data));
@@ -101,7 +101,7 @@ namespace goldfish
 					throw std::bad_variant_access{};
 				}
 			}, m_data);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return result;
@@ -144,7 +144,7 @@ namespace goldfish
 					throw std::bad_variant_access{};
 				}
 			}, m_data);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return result;
@@ -208,7 +208,7 @@ namespace goldfish
 					throw std::bad_variant_access{};
 				}
 			}, m_data);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return result;
@@ -256,7 +256,7 @@ namespace goldfish
 					throw std::bad_variant_access{};
 				}
 			}, m_data);
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			m_moved_from = true;
 			#endif
 			return result;
@@ -297,7 +297,7 @@ namespace goldfish
 				throw integer_overflow_while_casting{};
 		}
 
-		#ifndef NDEBUG
+		#ifdef _DEBUG
 		bool m_moved_from = false;
 		#endif
 		std::variant<types...> m_data;

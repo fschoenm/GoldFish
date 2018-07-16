@@ -77,7 +77,7 @@ namespace goldfish
 		{}
 		std::optional<decltype(std::declval<Map>().read_value())> read_by_schema_index(size_t index)
 		{
-			#ifndef NDEBUG
+			#ifdef _DEBUG
 			if (m_last_queried_index)
 				assert(*m_last_queried_index < index);
 			m_last_queried_index = index;
@@ -160,7 +160,7 @@ namespace goldfish
 		size_t m_index = 0;
 		bool m_on_value = false;
 
-		#ifndef NDEBUG
+		#ifdef _DEBUG
 		optional<size_t> m_last_queried_index;
 		#endif
 	};
