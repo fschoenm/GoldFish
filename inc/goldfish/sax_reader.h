@@ -39,30 +39,30 @@ namespace goldfish
 			assert(!m_moved_from);
 			return std::visit(l, std::move(m_data));
 		}
-		auto as_string()
+		type_with_tag_t<tags::string> as_string()
 		{
 			assert(!m_moved_from);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(std::get<type_with_tag_t<tags::string>>(m_data));
+			return std::get<type_with_tag_t<tags::string>>(std::move(m_data));
 		}
 		auto as_binary() { return as_binary(std::integral_constant<bool, does_json_conversions>()); }
-		auto as_array()
+		type_with_tag_t<tags::array> as_array()
 		{
 			assert(!m_moved_from);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(std::get<type_with_tag_t<tags::array>>(m_data));
+			return std::get<type_with_tag_t<tags::array>>(std::move(m_data));
 		}
-		auto as_map()
+		type_with_tag_t<tags::map> as_map()
 		{
 			assert(!m_moved_from);
 			#ifndef NDEBUG
 			m_moved_from = true;
 			#endif
-			return std::move(std::get<type_with_tag_t<tags::map>>(m_data));
+			return std::get<type_with_tag_t<tags::map>>(std::move(m_data));
 		}
 		template <class... Args> auto as_object(Args&&... args) { return as_map(std::forward<Args>(args)...); }
 
@@ -267,8 +267,8 @@ namespace goldfish
 		template <class tag> bool is_exactly() { return std::holds_alternative<type_with_tag_t<tag>>(m_data); }
 
 	private:
-		auto as_binary(std::true_type /*does_json_conversion*/) { return stream::decode_base64(as_string()); }
-		auto as_binary(std::false_type /*does_json_conversion*/) { return std::move(std::get<type_with_tag_t<tags::binary>>(m_data)); }
+		type_with_tag_t<tags::binary> as_binary(std::true_type /*does_json_conversion*/) { return stream::decode_base64(as_string()); }
+		type_with_tag_t<tags::binary> as_binary(std::false_type /*does_json_conversion*/) { return std::get<type_with_tag_t<tags::binary>>(std:move(m_data)); }
 
 		static uint64_t cast_signed_to_unsigned(int64_t x)
 		{
