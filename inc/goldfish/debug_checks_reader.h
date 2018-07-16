@@ -12,31 +12,27 @@ namespace goldfish { namespace debug_checks
 	template <class error_handler, class T> class array;
 	template <class error_handler, class T> class map;
 
-	template <class error_handler, class Document> struct document : document_impl<
-		Document::does_json_conversions,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		string<error_handler, typename Document::template type_with_tag_t<tags::string>, tags::string>,
-		string<error_handler, typename Document::template type_with_tag_t<tags::binary>, tags::binary>,
-		array<error_handler, typename Document::template type_with_tag_t<tags::array>>,
-		map<error_handler, typename Document::template type_with_tag_t<tags::map>>>
+	template <bool does_json_conversions_, class Document, class error_handler>
+	struct DocTraits {
+		using VariantT = std::variant<bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			string<error_handler, typename Document::template type_with_tag_t<tags::string>, tags::string>,
+			string<error_handler, typename Document::template type_with_tag_t<tags::binary>, tags::binary>,
+			array<error_handler, typename Document::template type_with_tag_t<tags::array>>,
+			map<error_handler, typename Document::template type_with_tag_t<tags::map>>>;
+
+		template <class tag> using type_with_tag_t = typename ::goldfish::tags::type_with_tag_t<tag,
+			bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			string<error_handler, typename Document::template type_with_tag_t<tags::string>, tags::string>,
+			string<error_handler, typename Document::template type_with_tag_t<tags::binary>, tags::binary>,
+			array<error_handler, typename Document::template type_with_tag_t<tags::array>>,
+			map<error_handler, typename Document::template type_with_tag_t<tags::map>>>;
+
+		static constexpr bool does_json_conversions = does_json_conversions_;
+	};
+
+	template <class error_handler, class Document> struct document : document_impl<DocTraits<Document::does_json_conversions, Document, error_handler>>
 	{
-		using document_impl<
-		Document::does_json_conversions,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		string<error_handler, typename Document::template type_with_tag_t<tags::string>, tags::string>,
-		string<error_handler, typename Document::template type_with_tag_t<tags::binary>, tags::binary>,
-		array<error_handler, typename Document::template type_with_tag_t<tags::array>>,
-		map<error_handler, typename Document::template type_with_tag_t<tags::map>>>::document_impl;
+		using document_impl<DocTraits<Document::does_json_conversions, Document, error_handler>>::document_impl;
 	};
 
 	template <class error_handler, class Document> document<error_handler, std::decay_t<Document>> add_read_checks_impl(container_base<error_handler>* parent, Document&& t);

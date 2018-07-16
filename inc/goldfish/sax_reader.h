@@ -17,13 +17,13 @@ namespace goldfish
 	}
 	struct integer_overflow_while_casting : exception { integer_overflow_while_casting() : exception("Integer too large") {} };
 
-	template <bool _does_json_conversions, class... types>
+	template <class DocTraitsT>
 	class document_impl
 	{
 	public:
 		using tag = tags::document;
-		template <class tag> using type_with_tag_t = tags::type_with_tag_t<tag, types...>;
-		enum { does_json_conversions = _does_json_conversions };
+		template <class tag> using type_with_tag_t = typename DocTraitsT::template type_with_tag_t<tag>;
+		static constexpr bool does_json_conversions = DocTraitsT::does_json_conversions;
 
 		template <class... Args> document_impl(Args&&... args)
 			: m_data(std::forward<Args>(args)...)
@@ -300,7 +300,7 @@ namespace goldfish
 		#ifdef _DEBUG
 		bool m_moved_from = false;
 		#endif
-		std::variant<types...> m_data;
+		typename DocTraitsT::VariantT m_data;
 	};
 
 	template <class Document> std::enable_if_t<tags::has_tag<std::decay_t<Document>, tags::document>::value, void> seek_to_end(Document&& d)

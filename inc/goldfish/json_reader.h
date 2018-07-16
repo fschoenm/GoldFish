@@ -17,31 +17,21 @@ namespace goldfish { namespace json
 	template <class Stream> class text_string;
 	template <class Stream> class array;
 	template <class Stream> class map;
-	template <class Stream> struct document : document_impl<
-		true /*does_json_conversions*/,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		text_string<Stream>,
-		byte_string,
-		array<Stream>,
-		map<Stream>>
+
+	template <class Stream>
+	struct DocTraits {
+		using VariantT = std::variant<bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			byte_string, text_string<Stream>, array<Stream>, map<Stream>>;
+
+		template <class tag> using type_with_tag_t = ::goldfish::tags::type_with_tag_t<tag,
+			bool, std::nullptr_t, uint64_t, int64_t, double, undefined,
+			byte_string, text_string<Stream>, array<Stream>, map<Stream>>;
+
+		static constexpr bool does_json_conversions = true;
+	};
+	template <class Stream> struct document : document_impl<DocTraits<Stream>>
 	{
-		using document_impl<
-		true /*does_json_conversions*/,
-		bool,
-		std::nullptr_t,
-		uint64_t,
-		int64_t,
-		double,
-		undefined,
-		text_string<Stream>,
-		byte_string,
-		array<Stream>,
-		map<Stream>>::document_impl;
+		using document_impl<DocTraits<Stream>>::document_impl;
 	};
 	template <class Stream> document<std::decay_t<Stream>> read_no_debug_check(Stream&& s);
 
