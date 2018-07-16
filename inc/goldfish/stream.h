@@ -278,7 +278,7 @@ namespace goldfish { namespace stream
 		auto flush()
 		{
 			assert(!m_flushed);
-			#ifdef _DEBUG
+			#ifndef NDEBUG
 			m_flushed = true;
 			#endif
 			return std::move(m_data);
@@ -294,7 +294,7 @@ namespace goldfish { namespace stream
 			return m_data;
 		}
 	private:
-		#ifdef _DEBUG
+		#ifndef NDEBUG
 		bool m_flushed = false;
 		#endif
 		std::vector<byte> m_data;
@@ -324,7 +324,7 @@ namespace goldfish { namespace stream
 		auto flush()
 		{
 			assert(!m_flushed);
-			#ifdef _DEBUG
+			#ifndef NDEBUG
 			m_flushed = true;
 			#endif
 			return std::move(m_data);
@@ -335,7 +335,7 @@ namespace goldfish { namespace stream
 			return m_data;
 		}
 	private:
-		#ifdef _DEBUG
+		#ifndef NDEBUG
 		bool m_flushed = false;
 		#endif
 		std::string m_data;

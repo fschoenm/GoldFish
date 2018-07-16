@@ -18,7 +18,7 @@ namespace goldfish { namespace debug_checks
 		#define GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER no_check
 	#endif
 
-	#ifdef _DEBUG
+	#ifndef NDEBUG
 	using default_error_handler = terminate_on_error;
 	#else
 	using default_error_handler = GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER;
