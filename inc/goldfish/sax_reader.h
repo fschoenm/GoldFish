@@ -268,7 +268,7 @@ namespace goldfish
 
 	private:
 		type_with_tag_t<tags::binary> as_binary(std::true_type /*does_json_conversion*/) { return stream::decode_base64(as_string()); }
-		type_with_tag_t<tags::binary> as_binary(std::false_type /*does_json_conversion*/) { return std::get<type_with_tag_t<tags::binary>>(std:move(m_data)); }
+		type_with_tag_t<tags::binary> as_binary(std::false_type /*does_json_conversion*/) { return std::get<type_with_tag_t<tags::binary>>(std::move(m_data)); }
 
 		static uint64_t cast_signed_to_unsigned(int64_t x)
 		{
