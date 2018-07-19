@@ -252,10 +252,6 @@ namespace goldfish { namespace json
 		// The characters are "popped" from the front of the array, if they are not invalid
 		// Once the end of the text is found (the unescaped " character is read), we write end_of_stream (0xFE) in this array
 		std::array<byte, 3> m_converted{ invalid_char, invalid_char, invalid_char };
-	public:
-		// This member is used by variant to store the type info
-		// This helps lower the size of a variant that contains a text_string by allowing variant to store the type in the padding rather than appending a new field
-		uint8_t padding_for_variant;
 	};
 
 	template <class Stream, char end_character> class comma_separated_reader
@@ -311,10 +307,6 @@ namespace goldfish { namespace json
 			middle,
 			ended,
 		} m_state = state::first;
-	public:
-		// This member is used by variant to store the type info
-		// This helps lower the size of a variant that contains an array or a map by allowing variant to store the type in the padding rather than appending a new field
-		uint8_t padding_for_variant;
 	};
 	template <class Stream> class array : public comma_separated_reader<Stream, ']'>
 	{
