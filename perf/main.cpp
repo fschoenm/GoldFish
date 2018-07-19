@@ -1,6 +1,7 @@
 #include <iostream>
 #include <numeric>
 #include <chrono>
+#include <algorithm>
 
 #include <goldfish/stream.h>
 #include <goldfish/file_stream.h>
@@ -38,18 +39,16 @@ void measure(Lambda&& l, size_t document_size)
 
 template <class Document> int64_t sum_ints(Document&& t)
 {
-	return t.visit(first_match(
-		[](auto x, tags::unsigned_int) -> int64_t { return x; },
-		[](auto x, tags::signed_int) { return x; },
-		[](auto& x, tags::array)
-		{
+	return t.visit([&](auto&& x) {
+		if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::unsigned_int>) { return x; }
+		else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::signed_int>) { return x; }
+		else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::array>) {
 			int64_t sum = 0;
 			while (auto d = x.read())
 				sum += sum_ints(*d);
 			return sum;
-		},
-		[](auto& x, tags::map)
-		{
+		}
+		else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::map>) {
 			int64_t sum = 0;
 			while (auto key = x.read_key())
 			{
@@ -57,8 +56,11 @@ template <class Document> int64_t sum_ints(Document&& t)
 				sum += sum_ints(x.read_value());
 			}
 			return sum;
-		},
-		[](auto& x, auto tag) { goldfish::seek_to_end(x); return 0ll; }));
+		}
+		else {
+			 goldfish::seek_to_end(x); return 0ll;
+		}
+	});
 }
 
 int main(int argc, char* argv[])
