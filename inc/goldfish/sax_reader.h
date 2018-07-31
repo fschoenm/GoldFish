@@ -47,7 +47,19 @@ namespace goldfish
 			#endif
 			return std::get<type_with_tag_t<tags::string>>(std::move(m_data));
 		}
-		auto as_binary() { return as_binary(std::integral_constant<bool, does_json_conversions>()); }
+		auto as_binary()
+		{
+			if constexpr(does_json_conversions) {
+				return stream::decode_base64(as_string());
+			}
+			else {
+				assert(!m_moved_from);
+				#ifndef NDEBUG
+				m_moved_from = true;
+				#endif
+				return std::get<type_with_tag_t<tags::binary>>(std::move(m_data));
+			}
+		}
 		type_with_tag_t<tags::array> as_array()
 		{
 			assert(!m_moved_from);
@@ -267,9 +279,6 @@ namespace goldfish
 		template <class tag> bool is_exactly() { return std::holds_alternative<type_with_tag_t<tag>>(m_data); }
 
 	private:
-		type_with_tag_t<tags::binary> as_binary(std::true_type /*does_json_conversion*/) { return stream::decode_base64(as_string()); }
-		type_with_tag_t<tags::binary> as_binary(std::false_type /*does_json_conversion*/) { return std::get<type_with_tag_t<tags::binary>>(std::move(m_data)); }
-
 		static uint64_t cast_signed_to_unsigned(int64_t x)
 		{
 			if (x < 0)
