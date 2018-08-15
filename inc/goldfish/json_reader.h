@@ -8,6 +8,8 @@
 #include <optional>
 #include "sax_reader.h"
 #include <cmath>
+#include <charconv>
+#include <cstdlib>
 
 namespace goldfish { namespace json
 {
@@ -368,25 +370,44 @@ namespace goldfish { namespace json
 			stream::read<char>(s);
 		}
 	}
-	template <class Stream> double read_decimals(Stream& s)
+
+	template <class Stream> double read_double(Stream& s, bool negative, uint64_t predecimal_digits)
 	{
-		auto first = s.template peek<char>();
-		if (first == std::nullopt || *first < '0' || *first > '9')
-			throw ill_formatted_json_data{ "Invalid digit in JSON integer" };
+		static constexpr size_t MAX_DOUBLE_SIZE = 1079; // see https://stackoverflow.com/questions/1701055/
+		static constexpr size_t NULL_BYTE_SIZE = 1;
+		std::array<char, MAX_DOUBLE_SIZE + NULL_BYTE_SIZE> buffer;
+		auto buffer_iterator = buffer.begin();
 
-		double result = 0;
-		double divider = 1;
-		for (;;)
-		{
-			auto c = s.template peek<char>();
-			if (c == std::nullopt || *c < '0' || *c > '9')
-				return result;
+		if (negative)
+			*buffer_iterator++ = '-';
 
-			divider *= 10;
-			result += (*c - '0') / divider;
-			stream::read<char>(s);
+		char* start = negative ? buffer.data() + 1 : buffer.data();
+		std::to_chars_result to_char_result = std::to_chars(start, buffer.data() + buffer.size(), predecimal_digits);
+		assert(static_cast<std::underlying_type_t<decltype(to_char_result.ec)>>(to_char_result.ec) == 0);
+		buffer_iterator += (to_char_result.ptr - start);
+
+		//Process either '.','e','E'
+		*buffer_iterator++ = stream::read<char>(s);
+
+		while (auto c = s.template peek<char>()) {
+			if ((*c < '0' || *c > '9') && *c != '+' && *c != '-' && *c != 'e' && *c != 'E')
+				break;
+
+			if (buffer_iterator != buffer.end() - 1)
+				*buffer_iterator++ = stream::read<char>(s);
+			else //skip remaining least significant values, they cannot be represented in an IEEE 754 double anyway
+				stream::read<char>(s);
 		}
+
+		*buffer_iterator = 0;
+		errno = 0;
+		char* end_ptr;
+		double strtod_result = std::strtod(buffer.data(), &end_ptr);
+		if (errno != 0 || (end_ptr != &*buffer_iterator))
+			throw integer_overflow_in_json{ "Error parsing JSON number" };
+		return strtod_result;
 	}
+
 	template <class Stream> std::variant<uint64_t, int64_t, double> read_number(Stream& s, char first)
 	{
 		bool negative = false;
@@ -414,33 +435,7 @@ namespace goldfish { namespace json
 				return integer;
 			}
 		}
-
-		double decimals = 0;
-		if (floating_point_marker == '.')
-		{
-			stream::read<char>(s);
-			decimals = read_decimals(s);
-			floating_point_marker = s.template peek<char>();
-		}
-
-		double multiplier = 1.;
-		if (floating_point_marker == 'e' || floating_point_marker == 'E')
-		{
-			stream::read<char>(s);
-			first = stream::read<char>(s);
-			bool negative_exponent = false;
-			if (first == '+' || first == '-')
-			{
-				negative_exponent = (first == '-');
-				first = stream::read<char>(s);
-			}
-			auto exponent_value = read_unsigned_integer(s, first, true /*allow_leading_zeroes*/);
-			multiplier = pow(10., exponent_value);
-			if (negative_exponent)
-				multiplier = 1 / multiplier;
-		}
-
-		return (negative ? -1 : 1) * multiplier * ((double)integer + decimals);
+		return read_double(s, negative, integer);
 	}
 
 	template <class Stream> document<std::decay_t<Stream>> read_no_debug_check(Stream&& s)
