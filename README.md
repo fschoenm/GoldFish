@@ -36,64 +36,6 @@ int main()
 }
 ```
 
-### Parsing a JSON document with a schema
-SAX parsers are notoriously more complicated to use than DOM parser. The order of the fields in a JSON object matters for a SAX parser.
-Defining a schema (which is simply an ordering of the expected key names in the object) helps keep the code simple.
-Note that the example below is O(1) in memory (meaning the amount of memory used does not depend on the size of the document)
-
-```cpp
-#include <goldfish/json_reader.h>
-
-int main()
-{
-	using namespace goldfish;
-
-	auto document = json::read(stream::read_string("{\"a\":1,\"c\":3.5}")).as_map("a", "b", "c");
-	assert(document.read("a")->as_uint64() == 1);
-	assert(document.read("b") == nullopt);
-	assert(document.read("c")->as_double() == 3.5);
-	seek_to_end(document);
-}
-```
-
-How about a more complicated example. Note again that this program doesn't allocate memory to parse the document and could run on very large documents backed by file (using `stream::file_reader`) or other type of stream, even on resource constrained machines.
-
-```cpp
-#include <goldfish/json_reader.h>
-#include <goldfish/iostream_adaptor.h> // to be able to output streams to cout
-#include <iostream>
-
-int main()
-{
-	using namespace goldfish;
-
-	auto document = json::read(stream::read_string(
-		R"([
-			{"name":"Alice","friends":["Bob","Charlie"]},
-			{"name":"Bob","friends":["Alice"]}
-		])")).as_array();
-
-	while (auto entry_document = document.read())
-	{
-		auto entry = entry_document->as_map("name", "friends");
-		std::cout << entry.read("name").value().as_string() << " has the following friends: ";
-
-		auto friends = entry.read("friends").value().as_array();
-		while (auto friend_name = friends.read())
-			std::cout << friend_name->as_string() << " ";
-
-		std::cout << "\n";
-		seek_to_end(entry);
-	}
-	
-	/*
-	This program outputs:
-		Alice has the following friends: Bob Charlie
-		Bob has the following friends: Alice
-	*/
-}
-```
-
 ### Generating a JSON or CBOR document
 You can get a JSON or CBOR writer by calling `json::create_writer` or `cbor::create_writer` on an output stream.
 
