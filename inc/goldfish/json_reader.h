@@ -136,26 +136,26 @@ namespace goldfish { namespace json
 					if (it == buffer.end())
 						return original;
 				}
-				buffer.remove_front(it - buffer.begin());
+				remove_front(buffer, it - buffer.begin());
 
 				switch (lookup[c])
 				{
 				case E:
 					switch (stream::read<byte>(m_stream))
 					{
-					case '"':  buffer.pop_front() = '"';  break;
-					case '\\': buffer.pop_front() = '\\'; break;
-					case '/':  buffer.pop_front() = '/';  break;
-					case 'b':  buffer.pop_front() = '\b'; break;
-					case 'f':  buffer.pop_front() = '\f'; break;
-					case 'n':  buffer.pop_front() = '\n'; break;
-					case 'r':  buffer.pop_front() = '\r'; break;
-					case 't':  buffer.pop_front() = '\t'; break;
+					case '"':  pop_front(buffer) = '"';  break;
+					case '\\': pop_front(buffer) = '\\'; break;
+					case '/':  pop_front(buffer) = '/';  break;
+					case 'b':  pop_front(buffer) = '\b'; break;
+					case 'f':  pop_front(buffer) = '\f'; break;
+					case 'n':  pop_front(buffer) = '\n'; break;
+					case 'r':  pop_front(buffer) = '\r'; break;
+					case 't':  pop_front(buffer) = '\t'; break;
 					case 'u':
 					{
 						auto converted = compute_converted(read_utf32_character());
 						std::copy(converted.begin() + 1, converted.end(), m_converted.begin());
-						buffer.pop_front() = converted.front();
+						pop_front(buffer) = converted.front();
 						copy_from_converted(buffer);
 						break;
 					}
@@ -183,7 +183,7 @@ namespace goldfish { namespace json
 			{
 				assert(m_converted.front() != end_of_stream);
 
-				buffer.pop_front() = m_converted.front();
+				pop_front(buffer) = m_converted.front();
 				std::copy(m_converted.begin() + 1, m_converted.end(), m_converted.begin());
 				m_converted.back() = invalid_char;
 			}

@@ -14,7 +14,7 @@ namespace goldfish { namespace stream
 			: m_stream(std::move(rhs.m_stream))
 		{
 			m_buffered = buffer_ref(m_buffer_data.data(), rhs.m_buffered.size());
-			copy(rhs.m_buffered, m_buffered);
+			copy_span(rhs.m_buffered, m_buffered);
 		}
 		buffered_reader& operator = (const buffered_reader&) = delete;
 
@@ -36,7 +36,7 @@ namespace goldfish { namespace stream
 				fill_in_buffer();
 
 			auto cb = std::min(m_buffered.size(), data.size());
-			copy(m_buffered.remove_front(cb), buffer_ref{ data.begin(), cb });
+			copy_span(remove_front(m_buffered, cb), buffer_ref{ data.begin(), cb });
 			return cb;
 		}
 
@@ -44,13 +44,13 @@ namespace goldfish { namespace stream
 		{
 			if (x <= m_buffered.size())
 			{
-				m_buffered.remove_front(static_cast<size_t>(x));
+				remove_front(m_buffered, static_cast<size_t>(x));
 				return x;
 			}
 			else
 			{
 				auto skipped = m_buffered.size() + stream::seek(m_stream, x - m_buffered.size());
-				m_buffered.clear();
+				m_buffered = {};
 				return skipped;
 			}
 		}
@@ -67,7 +67,7 @@ namespace goldfish { namespace stream
 			if (m_buffered.size() < sizeof(T))
 				fill_in_buffer_ensure_size(sizeof(T));
 			auto* data = m_buffered.data();
-			m_buffered.remove_front(sizeof(T));
+			remove_front(m_buffered, sizeof(T));
 			return reinterpret_cast<T&>(*data);
 		}
 		template <class T, size_t alignment> T read_helper(std::integral_constant<size_t, alignment>, std::bool_constant<true> /*fits*/)
@@ -76,7 +76,7 @@ namespace goldfish { namespace stream
 				fill_in_buffer_ensure_size(sizeof(T));
 			T t;
 			memcpy(&t, m_buffered.data(), sizeof(t));
-			m_buffered.remove_front(sizeof(t));
+			remove_front(m_buffered, sizeof(t));
 			return t;
 		}
 		template <class T> std::optional<T> peek_helper(std::integral_constant<size_t, 1>)
@@ -107,10 +107,10 @@ namespace goldfish { namespace stream
 
 			while (m_buffered.size() < s)
 			{
-				auto cb = m_stream.read_partial_buffer({ m_buffered.end(), m_buffer_data.data() + N });
+				auto cb = m_stream.read_partial_buffer({ m_buffer_data.data() + m_buffered.size(), m_buffer_data.data() + N });
 				if (cb == 0)
 					return false;
-				m_buffered = { m_buffered.begin(), m_buffered.end() + cb };
+				m_buffered = { m_buffered.data(), m_buffered.size() + gsl::narrow_cast<std::ptrdiff_t>(cb) };
 			}
 
 			return true;
@@ -157,7 +157,7 @@ namespace goldfish { namespace stream
 			{
 				auto cb = cb_free();
 				m_begin_free_space = std::copy(data.begin(), data.begin() + cb, m_begin_free_space);
-				data.remove_front(cb);
+				remove_front(data, cb);
 				if (data.empty())
 					return;
 				send_data();

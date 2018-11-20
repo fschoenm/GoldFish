@@ -22,7 +22,7 @@ namespace goldfish { namespace stream
 			while (data.size() >= 3)
 			{
 				auto c_read = deserialize_up_to_3_bytes(data);
-				data.remove_front(c_read);
+				remove_front(data, c_read);
 				if (c_read != 3)
 					return original_size - data.size();
 			}
@@ -39,7 +39,7 @@ namespace goldfish { namespace stream
 		void read_from_already_parsed(buffer_ref& data)
 		{
 			auto cb_to_copy = static_cast<uint8_t>(std::min<size_t>(data.size(), m_cb_already_parsed));
-			copy(const_buffer_ref{ m_already_parsed.data(), m_already_parsed.data() + cb_to_copy }, data.remove_front(cb_to_copy));
+			copy_span(const_buffer_ref{ m_already_parsed.data(), m_already_parsed.data() + cb_to_copy }, remove_front(data, cb_to_copy));
 			m_cb_already_parsed -= cb_to_copy;
 			std::copy(m_already_parsed.begin() + cb_to_copy, m_already_parsed.end(), m_already_parsed.begin());
 		}
@@ -151,12 +151,12 @@ namespace goldfish { namespace stream
 				if (data.size() >= 2)
 				{
 					write_triplet(m_pending_encoding[0], data[0], data[1]);
-					data.remove_front(2);
+					remove_front(data, 2);
 					m_cb_pending_encoding = 0;
 				}
 				else
 				{
-					m_pending_encoding[1] = data.front();
+					m_pending_encoding[1] = data[0];
 					++m_cb_pending_encoding;
 					return;
 				}
@@ -164,14 +164,14 @@ namespace goldfish { namespace stream
 			else if (m_cb_pending_encoding == 2)
 			{
 				write_triplet(m_pending_encoding[0], m_pending_encoding[1], data[0]);
-				data.remove_front(1);
+				remove_front(data, 1);
 				m_cb_pending_encoding = 0;
 			}
 
 			while (data.size() >= 3)
 			{
 				write_triplet(data[0], data[1], data[2]);
-				data.remove_front(3);
+				remove_front(data, 3);
 			}
 
 			std::copy(data.begin(), data.end(), m_pending_encoding.begin());

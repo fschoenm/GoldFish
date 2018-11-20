@@ -55,17 +55,17 @@ namespace goldfish { namespace json
 			};
 			static_assert(sizeof(lookup) / sizeof(lookup[0]) == 256, "The lookup table should have 256 entries");
 
-			auto it = buffer.begin();
+			auto pos = 0;
 			for (;;)
 			{
-				auto prev = it;
-				while (it != buffer.end() && lookup[*it] == F)
-					++it;
-				m_stream.write_buffer({ prev, it });
-				if (it == buffer.end())
+				auto prev = pos;
+				while (pos != buffer.size() && lookup[buffer[pos]] == F)
+					++pos;
+				m_stream.write_buffer(buffer.subspan(prev, pos));
+				if (pos == buffer.size())
 					break;
 
-				switch (lookup[*it])
+				switch (lookup[buffer[pos]])
 				{
 					case B: stream::write(m_stream, '\\'); stream::write(m_stream, 'b'); break;
 					case N: stream::write(m_stream, '\\'); stream::write(m_stream, 'n'); break;
@@ -75,12 +75,12 @@ namespace goldfish { namespace json
 					case S: stream::write(m_stream, '\\'); stream::write(m_stream, '\\'); break;
 					case U:
 					{
-						char data[6] = { '\\', 'u', '0', '0', "0123456789ABCDEF"[*it / 16], "0123456789ABCDEF"[*it % 16] };
+						char data[6] = { '\\', 'u', '0', '0', "0123456789ABCDEF"[buffer[pos] / 16], "0123456789ABCDEF"[buffer[pos] % 16] };
 						m_stream.write_buffer({ reinterpret_cast<const byte*>(data), 6 });
 					}
 					break;
 				}
-				++it;
+				++pos;
 			}
 		}
 		auto flush()

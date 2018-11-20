@@ -35,15 +35,15 @@ namespace goldfish { namespace stream
 
 	template <class Stream> enable_if_reader_t<Stream, size_t> read_full_buffer(Stream&& s, buffer_ref buffer)
 	{
-		auto cur = buffer.begin();
-		while (cur != buffer.end())
+		std::ptrdiff_t cur = 0;
+		while (cur != buffer.size())
 		{
-			auto cb = s.read_partial_buffer({ cur, buffer.end() });
+			auto cb = s.read_partial_buffer(buffer.subspan(cur, buffer.size() - cur));
 			if (cb == 0)
 				break;
 			cur += cb;
 		}
-		return cur - buffer.begin();
+		return cur;
 	}
 
 	template <class Stream> std::enable_if_t< has_seek<Stream>::value, uint64_t> seek(Stream& s, uint64_t x)
@@ -56,7 +56,7 @@ namespace goldfish { namespace stream
 		byte buffer[typical_buffer_length];
 		while (x > 0)
 		{
-			auto cb = s.read_partial_buffer({ buffer, static_cast<size_t>(std::min<uint64_t>(sizeof(buffer), x)) });
+			auto cb = s.read_partial_buffer({ buffer, gsl::narrow_cast<std::ptrdiff_t>(std::min<uint64_t>(sizeof(buffer), x)) });
 			if (cb == 0)
 				break;
 			x -= cb;
@@ -151,12 +151,12 @@ namespace goldfish { namespace stream
 		size_t read_partial_buffer(buffer_ref data)
 		{
 			auto to_copy = std::min(m_data.size(), data.size());
-			return copy(m_data.remove_front(to_copy), data.remove_front(to_copy));
+			return copy_span(remove_front(m_data, to_copy), remove_front(data, to_copy));
 		}
 		uint64_t seek(uint64_t x)
 		{
 			auto to_seek = static_cast<size_t>(std::min<uint64_t>(x, m_data.size()));
-			m_data.remove_front(to_seek);
+			remove_front(m_data, to_seek);
 			return to_seek;
 		}
 
@@ -187,7 +187,7 @@ namespace goldfish { namespace stream
 		{
 			if (m_data.size() < sizeof(T))
 				throw unexpected_end_of_stream();
-			return reinterpret_cast<const T&>(*m_data.remove_front(sizeof(T)).data());
+			return reinterpret_cast<const T&>(*remove_front(m_data, sizeof(T)).data());
 		}
 		template <class T, size_t s> T read_helper(std::integral_constant<size_t, s>)
 		{
@@ -195,7 +195,7 @@ namespace goldfish { namespace stream
 				throw unexpected_end_of_stream();
 			T t;
 			memcpy(&t, m_data.data(), sizeof(t));
-			m_data.remove_front(sizeof(t));
+			remove_front(m_data, sizeof(t));
 			return t;
 		}
 
@@ -206,8 +206,8 @@ namespace goldfish { namespace stream
 
 	inline const_buffer_ref_reader read_buffer_ref(const_buffer_ref x) { return{ x }; }
 	template <size_t N> const_buffer_ref_reader read_string_ref(const char(&s)[N]) { return string_literal_to_non_null_terminated_buffer(s); }
-	inline const_buffer_ref_reader read_string_ref(const char* s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s), strlen(s) }; }
-	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s.data()), s.size() }; }
+	inline const_buffer_ref_reader read_string_ref(const char* s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s), gsl::narrow_cast<std::ptrdiff_t>(strlen(s)) }; }
+	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s.data()), gsl::narrow_cast<std::ptrdiff_t>(s.size()) }; }
 
 	class vector_reader : public const_buffer_ref_reader
 	{
@@ -220,7 +220,7 @@ namespace goldfish { namespace stream
 		vector_reader(const vector_reader&) = delete;
 		vector_reader(vector_reader&& rhs)
 		{
-			auto index_from = rhs.m_data.begin() - rhs.m_buffer.data();
+			auto index_from = rhs.m_data.data() - rhs.m_buffer.data();
 			m_buffer = std::move(rhs.m_buffer);
 			m_data = {
 				m_buffer.data() + index_from,
@@ -238,11 +238,11 @@ namespace goldfish { namespace stream
 		string_reader(std::string&& buffer)
 			: m_buffer(std::move(buffer))
 		{
-			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), m_buffer.size() };
+			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), gsl::narrow_cast<std::ptrdiff_t>(m_buffer.size()) };
 		}
 		string_reader(string_reader&& rhs)
 		{
-			auto index_from = rhs.m_data.begin() - reinterpret_cast<const byte*>(rhs.m_buffer.data());
+			auto index_from = rhs.m_data.data() - reinterpret_cast<const byte*>(rhs.m_buffer.data());
 			m_buffer = std::move(rhs.m_buffer);
 			m_data = {
 				reinterpret_cast<const byte*>(m_buffer.data()) + index_from,
@@ -314,7 +314,7 @@ namespace goldfish { namespace stream
 			if (m_data.capacity() - m_data.size() < d.size())
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 
-			m_data.append(reinterpret_cast<const char*>(d.begin()), reinterpret_cast<const char*>(d.end()));
+			m_data.append(std::string_view(reinterpret_cast<const char*>(d.data()), d.size()));
 		}
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) == 1, void> write(const T& t)
 		{
@@ -360,6 +360,6 @@ namespace goldfish { namespace stream
 	{
 		byte buffer[typical_buffer_length];
 		while (auto cb = r.read_partial_buffer(buffer))
-			w.write_buffer({ buffer, cb });
+			w.write_buffer({ buffer, gsl::narrow_cast<std::ptrdiff_t>(cb) });
 	}
 }}
