@@ -47,6 +47,8 @@ namespace goldfish { namespace sax
 		// Write the key, don't start the value
 		void write_key(const std::string_view& t) { append_key().write(t); }
 		template <class T> void write_key(T&& t) { append_key().write(std::forward<T>(t)); }
+		void write_key(const uint64_t t) { append_key().write(t); }
+
 		auto start_binary_key(uint64_t cb) { return append_key().start_binary(cb); }
 		auto start_binary_key() { return append_key().start_binary(); }
 		auto start_string_key(uint64_t cb) { return append_key().start_string(cb); }
@@ -84,6 +86,12 @@ namespace goldfish { namespace sax
 
 		// Write both the key and the value
 		template <class U> void write(const std::string_view& key, U&& value)
+		{
+			write_key(key);
+			write_value(std::forward<U>(value));
+		}
+
+		template <class U> void write(const uint64_t key, U&& value)
 		{
 			write_key(key);
 			write_value(std::forward<U>(value));
