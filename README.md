@@ -200,7 +200,6 @@ A document reader offers the following APIs:
 	* For JSON documents, return a stream that decodes the base64 encoded text if the document is text (for example, if the document is `"SGVsbG8="`, this API returns a stream that reads `Hello`)
 * `as_array()`: if the document is an array (for example `[1,"Hello"]` in JSON, or an object of major type 4 in CBOR), return an `array reader` object, otherwise throw `goldfish::bad_variant_access`
 * `as_map()`, `as_object()`: if the document is an object (for example `{"Hello":1}` in JSON, or an object of major type 5 in CBOR), return a `map reader` object, otherwise throw `goldfish::bad_variant_access`
-* `as_map(...)`, `as_object(...)`: if parameters are specified to `as_map` or `as_object`, a `map reader with schema` object is returned. This allows for simpler parsing of documents when the keys and their order is known in advance.
 * `as_double`:
 	* if the document is an integer or a floating point (for example `1`, `-1` or `1.0` in JSON), return a double that represents the value of the document.
 	* Strings are parsed, which means the JSON document `"8000"` can be read as either the text `8000` using as_text, the text `�M4` using as_binary, the double `8000`, the signed integer `8000` or the unsigned integer `8000`
