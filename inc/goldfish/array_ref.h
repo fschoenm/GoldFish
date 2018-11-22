@@ -14,10 +14,18 @@ namespace goldfish
 	using const_buffer_ref = gsl::span<const byte>;
 	using buffer_ref = gsl::span<byte>;
 
-	size_t copy_span(gsl::span<const byte> from, gsl::span<byte> to)
+	template <class ElementType, std::ptrdiff_t Extent,
+		class = std::enable_if_t<!std::is_const<ElementType>::value>>
+		gsl::span<byte, gsl::details::calculate_byte_size<ElementType, Extent>::value>
+		as_writeable_bytes(gsl::span<ElementType, Extent> s) noexcept
+	{
+		return { reinterpret_cast<byte*>(s.data()), s.size_bytes() };
+	}
+
+	inline size_t copy_span(gsl::span<const byte> from, gsl::span<byte> to)
 	{
 		assert(from.size() == to.size());
-		std::copy(from.begin(), from.end(), make_unchecked_array_iterator(to.begin()));
+		std::copy(from.begin(), from.end(),to.begin());
 		return from.size();
 	}
 	
@@ -26,8 +34,8 @@ namespace goldfish
 	
 	template <class T> 
 	gsl::span<T> remove_front(gsl::span<T>& in, size_t n) {
-		assert(n <= in.size());
-		auto ret = in.subspan(0, n);
+		assert(gsl::narrow_cast<std::ptrdiff_t>(n) <= in.size());
+		auto ret = in.first(n);
 		in = in.subspan(n);
 		return ret;
 	}

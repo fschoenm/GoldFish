@@ -65,7 +65,7 @@ namespace goldfish { namespace cbor
 				return 0;
 
 			auto cb_to_read = static_cast<size_t>(std::min<uint64_t>(buffer.size(), m_remaining_in_current_block));
-			auto cb_read = m_stream.read_partial_buffer({ buffer.begin(), cb_to_read });
+			auto cb_read = m_stream.read_partial_buffer(buffer.first(cb_to_read));
 			m_remaining_in_current_block -= cb_read;
 			return cb_read;
 		}

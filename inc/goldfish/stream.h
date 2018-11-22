@@ -38,7 +38,7 @@ namespace goldfish { namespace stream
 		std::ptrdiff_t cur = 0;
 		while (cur != buffer.size())
 		{
-			auto cb = s.read_partial_buffer(buffer.subspan(cur, buffer.size() - cur));
+			auto cb = s.read_partial_buffer(buffer.subspan(cur));
 			if (cb == 0)
 				break;
 			cur += cb;
@@ -271,7 +271,7 @@ namespace goldfish { namespace stream
 		void write_buffer(const_buffer_ref d)
 		{
 			assert(!m_flushed);
-			if (m_data.capacity() - m_data.size() < d.size())
+			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 			m_data.insert(m_data.end(), d.begin(), d.end());
 		}
@@ -311,7 +311,7 @@ namespace goldfish { namespace stream
 		void write_buffer(const_buffer_ref d)
 		{
 			assert(!m_flushed);
-			if (m_data.capacity() - m_data.size() < d.size())
+			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 
 			m_data.append(std::string_view(reinterpret_cast<const char*>(d.data()), d.size()));
