@@ -15,7 +15,7 @@ namespace goldfish { namespace stream
 			: m_stream(std::move(stream))
 		{}
 
-		size_t read_partial_buffer(buffer_ref data)
+		size_t read_partial_buffer(std::span<byte> data)
 		{
 			auto original_size = data.size();
 			read_from_already_parsed(data);
@@ -36,17 +36,17 @@ namespace goldfish { namespace stream
 			return original_size - data.size();
 		}
 	private:
-		void read_from_already_parsed(buffer_ref& data)
+		void read_from_already_parsed(std::span<byte>& data)
 		{
 			auto cb_to_copy = static_cast<uint8_t>(std::min<size_t>(data.size(), m_cb_already_parsed));
-			copy_span(const_buffer_ref{ m_already_parsed.data(), m_already_parsed.data() + cb_to_copy }, remove_front(data, cb_to_copy));
+			copy_span(std::span<const byte>{ m_already_parsed.data(), m_already_parsed.data() + cb_to_copy }, remove_front(data, cb_to_copy));
 			m_cb_already_parsed -= cb_to_copy;
 			std::copy(m_already_parsed.begin() + cb_to_copy, m_already_parsed.end(), m_already_parsed.begin());
 		}
 
 		// Read up to 4 characters (or the end of stream), remove the potential padding (base64 can be padded with '=' characters at the end)
 		// and generate up to 3 bytes of data
-		uint8_t deserialize_up_to_3_bytes(buffer_ref output)
+		uint8_t deserialize_up_to_3_bytes(std::span<byte> output)
 		{
 			byte buffer[4];
 			auto c_read = read_full_buffer(m_stream, buffer);
@@ -141,7 +141,7 @@ namespace goldfish { namespace stream
 		base64_writer(const base64_writer&) = delete;
 		base64_writer& operator = (const base64_writer&) = delete;
 
-		void write_buffer(const_buffer_ref data)
+		void write_buffer(std::span<const byte> data)
 		{
 			if (data.empty())
 				return;

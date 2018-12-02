@@ -58,7 +58,7 @@ namespace goldfish { namespace dom
 			[&](uint64_t x) { return writer.write(x); },
 			[&](int64_t x) { return writer.write(x); },
 			[&](double x) { return writer.write(x); },
-			[&](const std::vector<byte>& x) { return writer.write(const_buffer_ref{ x }); },
+			[&](const std::vector<byte>& x) { return writer.write(std::span<const byte>{ x }); },
 			[&](const std::string& x) { return writer.write(x); },
 			[&](const dom::array& x)
 			{

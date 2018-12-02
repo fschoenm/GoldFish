@@ -59,7 +59,7 @@ namespace goldfish { namespace cbor
 				throw ill_formatted_cbor_data{ "CBOR string too large" };
 		}
 
-		size_t read_partial_buffer(buffer_ref buffer)
+		size_t read_partial_buffer(std::span<byte> buffer)
 		{
 			if (buffer.empty() || !ensure_block())
 				return 0;

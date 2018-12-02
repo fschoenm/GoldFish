@@ -62,7 +62,7 @@ namespace goldfish { namespace stream
 		file_reader(const std::wstring& path)
 			: m_file(path, L"rb")
 		{}
-		size_t read_partial_buffer(buffer_ref data)
+		size_t read_partial_buffer(std::span<byte> data)
 		{
 			auto cb = fread(data.data(), 1 /*size*/, data.size() /*count*/, m_file.get());
 			if (cb != data.size())
@@ -92,7 +92,7 @@ namespace goldfish { namespace stream
 			: m_file(path, L"wb")
 		{}
 
-		void write_buffer(const_buffer_ref data)
+		void write_buffer(std::span<const byte> data)
 		{
 			if (fwrite(data.data(), 1 /*size*/, data.size() /*count*/, m_file.get()) != data.size())
 				throw io_exception_with_error_code{ "Error during file write", ferror(m_file.get()) };

@@ -73,7 +73,7 @@ namespace goldfish { namespace json
 	{
 	public:
 		using tag = tags::binary;
-		size_t read_partial_buffer(buffer_ref) { std::terminate(); }
+		size_t read_partial_buffer(std::span<byte>) { std::terminate(); }
 	};
 
 	/*
@@ -89,7 +89,7 @@ namespace goldfish { namespace json
 		{}
 		using tag = tags::string;
 
-		size_t read_partial_buffer(buffer_ref buffer)
+		size_t read_partial_buffer(std::span<byte> buffer)
 		{
 			if (m_converted.front() == end_of_stream)
 				return 0;
@@ -177,7 +177,7 @@ namespace goldfish { namespace json
 	private:
 		static const byte invalid_char = 0xFF;
 		static const byte end_of_stream = 0xFE;
-		void copy_from_converted(buffer_ref& buffer)
+		void copy_from_converted(std::span<byte>& buffer)
 		{
 			while (m_converted.front() != invalid_char && !buffer.empty())
 			{

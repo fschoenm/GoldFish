@@ -26,9 +26,6 @@ template <class ElementT, std::ptrdiff_t Extent = gsl::dynamic_extent> using spa
 
 namespace goldfish
 {
-	using const_buffer_ref = std::span<const byte>;
-	using buffer_ref = std::span<byte>;
-
 	template <class T, class U>
 	constexpr T narrow_cast(U&& u) noexcept
 	{
@@ -42,8 +39,8 @@ namespace goldfish
 		return from.size();
 	}
 	
-	template <class T> const_buffer_ref constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; }
-	template <class T> buffer_ref constexpr to_buffer(T& t) { return{ reinterpret_cast<byte*>(&t), reinterpret_cast<byte*>(&t + 1) }; }
+	template <class T> std::span<const byte> constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; }
+	template <class T> std::span<byte> constexpr to_buffer(T& t) { return{ reinterpret_cast<byte*>(&t), reinterpret_cast<byte*>(&t + 1) }; }
 	
 	template <class T> 
 	std::span<T> remove_front(std::span<T>& in, size_t n) {
@@ -59,7 +56,7 @@ namespace goldfish
 		in = in.subspan(1);
 		return ret;
 	}
-	template <size_t N> constexpr const_buffer_ref string_literal_to_non_null_terminated_buffer(const char(&text)[N])
+	template <size_t N> constexpr std::span<const byte> string_literal_to_non_null_terminated_buffer(const char(&text)[N])
 	{
 		static_assert(N > 0, "expect null terminated strings");
 		assert(text[N - 1] == 0);

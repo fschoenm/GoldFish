@@ -48,7 +48,7 @@ namespace goldfish { namespace debug_checks
 			, m_inner(std::move(inner))
 		{}
 
-		size_t read_partial_buffer(buffer_ref buffer)
+		size_t read_partial_buffer(std::span<byte> buffer)
 		{
 			if (buffer.empty())
 				return 0;

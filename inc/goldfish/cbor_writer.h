@@ -47,7 +47,7 @@ namespace goldfish { namespace cbor
 		indefinite_stream_writer(Stream&& s)
 			: m_stream(std::move(s))
 		{}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			details::write_integer<major>(m_stream, buffer.size());
 			m_stream.write_buffer(buffer);

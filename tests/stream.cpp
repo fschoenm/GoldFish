@@ -18,7 +18,7 @@ TEST_CASE(test_skip)
 
 		size_t m_size;
 
-		size_t read_partial_buffer(buffer_ref buffer)
+		size_t read_partial_buffer(std::span<byte> buffer)
 		{
 			// pretend we filled buffer with data
 			auto cb = std::min(buffer.size(), m_size);

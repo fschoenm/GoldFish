@@ -127,7 +127,7 @@ namespace goldfish { namespace sax
 
 		auto start_binary(uint64_t cb) { return m_writer.start_binary(cb); }
 		auto start_binary() { return m_writer.start_binary(); }
-		auto write(const_buffer_ref x)
+		auto write(std::span<const byte> x)
 		{
 			auto stream = start_binary(x.size());
 			stream.write_buffer(x);

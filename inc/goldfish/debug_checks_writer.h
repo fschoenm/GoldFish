@@ -19,7 +19,7 @@ namespace goldfish { namespace debug_checks
 			: container_base<error_handler>(parent)
 			, m_writer(std::move(writer))
 		{}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			err_if_locked();
 			m_writer.write_buffer(buffer);
@@ -42,7 +42,7 @@ namespace goldfish { namespace debug_checks
 			: m_writer(std::move(writer))
 			, m_cb_left(cb)
 		{}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			if (narrow_cast<std::ptrdiff_t>(m_cb_left) < buffer.size())
 				error_handler::on_error();

@@ -117,9 +117,9 @@ struct read_stream
 	// Returns the number of bytes copied, which might be less than buffer.size() if not all the data is immediately available
 	// Returns 0 if the buffer is empty or if the stream was at the end before the call was made.
 	//
-	// buffer_ref is an object that contains a pointer to the buffer (buffer.data() is the pointer)
+	// std::span<byte> is an object that contains a pointer to the buffer (buffer.data() is the pointer)
 	// as well as the number of bytes in the buffer (buffer.size())
-	size_t read_partial_buffer(buffer_ref buffer);
+	size_t read_partial_buffer(std::span<byte> buffer);
 }
 ```
 
@@ -128,7 +128,7 @@ Write streams have the following interface:
 struct write_stream
 {
 	// Write some data to the stream
-	void write_buffer(const_buffer_ref data);
+	void write_buffer(std::span<const byte> data);
 
 	// Finish writing to the stream
 	// This API must be called once the end of stream is reached.

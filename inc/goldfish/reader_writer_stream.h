@@ -16,7 +16,7 @@ namespace goldfish { namespace stream
 		class reader_writer_stream
 		{
 		public:
-			size_t read_partial_buffer(buffer_ref data)
+			size_t read_partial_buffer(std::span<byte> data)
 			{
 				auto original_size = data.size();
 				if (original_size == 0)
@@ -32,7 +32,7 @@ namespace goldfish { namespace stream
 				return original_size - data.size();
 			}
 
-			void write_buffer(const_buffer_ref data)
+			void write_buffer(std::span<const byte> data)
 			{
 				std::unique_lock<std::mutex> lock(m_mutex);
 				assert(m_state != state::flushed);
@@ -75,7 +75,7 @@ namespace goldfish { namespace stream
 		private:
 			std::mutex m_mutex;
 			std::condition_variable m_condition_variable;
-			buffer_ref* m_read_buffer;
+			std::span<byte>* m_read_buffer;
 
 			enum class state
 			{
@@ -110,7 +110,7 @@ namespace goldfish { namespace stream
 			if (m_stream)
 				m_stream->terminate();
 		}
-		size_t read_partial_buffer(buffer_ref data)
+		size_t read_partial_buffer(std::span<byte> data)
 		{
 			return m_stream->read_partial_buffer(data);
 		}
@@ -141,7 +141,7 @@ namespace goldfish { namespace stream
 			if (m_stream)
 				m_stream->terminate();
 		}
-		void write_buffer(const_buffer_ref data)
+		void write_buffer(std::span<const byte> data)
 		{
 			m_stream->write_buffer(data);
 		}

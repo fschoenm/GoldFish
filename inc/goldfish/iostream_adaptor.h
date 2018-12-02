@@ -12,7 +12,7 @@ namespace goldfish { namespace stream
 		istream_reader_ref(std::istream& stream)
 			: m_stream(stream)
 		{}
-		size_t read_partial_buffer(buffer_ref buffer)
+		size_t read_partial_buffer(std::span<byte> buffer)
 		{
 			if (buffer.empty())
 				return 0;
@@ -35,7 +35,7 @@ namespace goldfish { namespace stream
 		ostream_writer_ref(std::ostream& stream)
 			: m_stream(stream)
 		{}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			m_stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 			if (m_stream.fail())

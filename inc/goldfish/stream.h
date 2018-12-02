@@ -11,12 +11,12 @@ namespace goldfish { namespace stream
 {
 	struct unexpected_end_of_stream : ill_formatted { unexpected_end_of_stream() : ill_formatted("Unexpected end of stream") {} };
 
-	template <class T> static std::true_type test_is_reader(decltype(std::declval<T>().read_partial_buffer(buffer_ref{}))*) { return{}; }
+	template <class T> static std::true_type test_is_reader(decltype(std::declval<T>().read_partial_buffer(std::span<byte>{}))*) { return{}; }
 	template <class T> static std::false_type test_is_reader(...) { return{}; }
 	template <class T> struct is_reader : decltype(test_is_reader<T>(nullptr)) {};
 	template <class T, class U> using enable_if_reader_t = std::enable_if_t<is_reader<std::decay_t<T>>::value, U>;
 
-	template <class T> static std::true_type test_is_writer(decltype(std::declval<T>().write_buffer(const_buffer_ref{}))*) { return{}; }
+	template <class T> static std::true_type test_is_writer(decltype(std::declval<T>().write_buffer(std::span<const byte>{}))*) { return{}; }
 	template <class T> static std::false_type test_is_writer(...) { return{}; }
 	template <class T> struct is_writer : decltype(test_is_writer<T>(nullptr)) {};
 	template <class T, class U> using enable_if_writer_t = std::enable_if_t<is_writer<std::decay_t<T>>::value, U>;
@@ -33,7 +33,7 @@ namespace goldfish { namespace stream
 	template <class T, class elem> static std::false_type test_has_read(...) { return{}; }
 	template <class T, class elem> struct has_read : decltype(test_has_read<T, elem>(nullptr)) {};
 
-	template <class Stream> enable_if_reader_t<Stream, size_t> read_full_buffer(Stream&& s, buffer_ref buffer)
+	template <class Stream> enable_if_reader_t<Stream, size_t> read_full_buffer(Stream&& s, std::span<byte> buffer)
 	{
 		std::ptrdiff_t cur = 0;
 		while (cur != buffer.size())
@@ -97,7 +97,7 @@ namespace goldfish { namespace stream
 		ref_reader(inner& stream)
 			: m_stream(stream)
 		{}
-		size_t read_partial_buffer(buffer_ref data) { return m_stream.read_partial_buffer(data); }
+		size_t read_partial_buffer(std::span<byte> data) { return m_stream.read_partial_buffer(data); }
 		template <class T> auto read() { return stream::read<T>(m_stream); }
 		uint64_t seek(uint64_t x) { return stream::seek(m_stream, x); }
 		template <class T> auto peek() { return m_stream.template peek<T>(); }
@@ -113,7 +113,7 @@ namespace goldfish { namespace stream
 		ref_writer(inner& stream)
 			: m_stream(stream)
 		{}
-		void write_buffer(const_buffer_ref data) { return m_stream.write_buffer(data); }
+		void write_buffer(std::span<const byte> data) { return m_stream.write_buffer(data); }
 		template <class T> auto write(const T& t) { return stream::write(m_stream, t); }
 
 		// Note that the ref_writer doesn't flush
@@ -145,10 +145,10 @@ namespace goldfish { namespace stream
 		const_buffer_ref_reader& operator = (const const_buffer_ref_reader&) = delete;
 		const_buffer_ref_reader& operator = (const_buffer_ref_reader&&) = delete;
 
-		const_buffer_ref_reader(const_buffer_ref data)
+		const_buffer_ref_reader(std::span<const byte> data)
 			: m_data(data)
 		{}
-		size_t read_partial_buffer(buffer_ref data)
+		size_t read_partial_buffer(std::span<byte> data)
 		{
 			auto to_copy = std::min(m_data.size(), data.size());
 			return copy_span(remove_front(m_data, to_copy), remove_front(data, to_copy));
@@ -199,15 +199,15 @@ namespace goldfish { namespace stream
 			return t;
 		}
 
-		const_buffer_ref data() const { return m_data; }
+		std::span<const byte> data() const { return m_data; }
 	protected:
-		const_buffer_ref m_data;
+		std::span<const byte> m_data;
 	};
 
-	inline const_buffer_ref_reader read_buffer_ref(const_buffer_ref x) { return{ x }; }
+	inline const_buffer_ref_reader read_buffer_ref(std::span<const byte> x) { return{ x }; }
 	template <size_t N> const_buffer_ref_reader read_string_ref(const char(&s)[N]) { return string_literal_to_non_null_terminated_buffer(s); }
-	inline const_buffer_ref_reader read_string_ref(const char* s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s), narrow_cast<std::ptrdiff_t>(strlen(s)) }; }
-	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return const_buffer_ref{ reinterpret_cast<const uint8_t*>(s.data()), narrow_cast<std::ptrdiff_t>(s.size()) }; }
+	inline const_buffer_ref_reader read_string_ref(const char* s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s), narrow_cast<std::ptrdiff_t>(strlen(s)) }; }
+	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s.data()), narrow_cast<std::ptrdiff_t>(s.size()) }; }
 
 	class vector_reader : public const_buffer_ref_reader
 	{
@@ -268,7 +268,7 @@ namespace goldfish { namespace stream
 		vector_writer& operator=(vector_writer&&) = default;
 		vector_writer& operator=(const vector_writer&) = delete;
 
-		void write_buffer(const_buffer_ref d)
+		void write_buffer(std::span<const byte> d)
 		{
 			assert(!m_flushed);
 			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
@@ -308,7 +308,7 @@ namespace goldfish { namespace stream
 		string_writer& operator=(string_writer&&) = default;
 		string_writer& operator=(const string_writer&) = delete;
 
-		void write_buffer(const_buffer_ref d)
+		void write_buffer(std::span<const byte> d)
 		{
 			assert(!m_flushed);
 			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))

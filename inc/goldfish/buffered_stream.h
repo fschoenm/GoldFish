@@ -13,7 +13,7 @@ namespace goldfish { namespace stream
 		buffered_reader(buffered_reader&& rhs)
 			: m_stream(std::move(rhs.m_stream))
 		{
-			m_buffered = buffer_ref(m_buffer_data.data(), rhs.m_buffered.size());
+			m_buffered = std::span<byte>(m_buffer_data.data(), rhs.m_buffered.size());
 			copy_span(rhs.m_buffered, m_buffered);
 		}
 		buffered_reader& operator = (const buffered_reader&) = delete;
@@ -27,7 +27,7 @@ namespace goldfish { namespace stream
 			return peek_helper<T>(std::integral_constant<size_t, alignof(T)>());
 		}
 
-		size_t read_partial_buffer(buffer_ref data)
+		size_t read_partial_buffer(std::span<byte> data)
 		{
 			if (data.empty())
 				return 0;
@@ -36,7 +36,7 @@ namespace goldfish { namespace stream
 				fill_in_buffer();
 
 			auto cb = std::min(m_buffered.size(), data.size());
-			copy_span(remove_front(m_buffered, cb), buffer_ref{ data.begin(), cb });
+			copy_span(remove_front(m_buffered, cb), std::span<byte>{ data.begin(), cb });
 			return cb;
 		}
 
@@ -122,7 +122,7 @@ namespace goldfish { namespace stream
 		}
 
 		inner m_stream;
-		buffer_ref m_buffered;
+		std::span<byte> m_buffered;
 		std::array<byte, N> m_buffer_data;
 	};
 
@@ -145,7 +145,7 @@ namespace goldfish { namespace stream
 		{
 			write_static<sizeof(t)>(reinterpret_cast<const byte*>(&t), std::bool_constant<(sizeof(t) < N)>());
 		}
-		void write_buffer(const_buffer_ref data)
+		void write_buffer(std::span<const byte> data)
 		{
 			if (data.size() <= cb_free())
 			{

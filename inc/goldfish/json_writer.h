@@ -21,7 +21,7 @@ namespace goldfish { namespace json
 		{
 			stream::write(m_stream, '"');
 		}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			enum category : uint8_t
 			{
@@ -100,7 +100,7 @@ namespace goldfish { namespace json
 		{
 			stream::write(m_stream.inner_stream(), '"');
 		}
-		void write_buffer(const_buffer_ref buffer)
+		void write_buffer(std::span<const byte> buffer)
 		{
 			m_stream.write_buffer(buffer);
 		}
