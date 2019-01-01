@@ -19,9 +19,13 @@
 using namespace std::literals::string_view_literals;
 
 #ifndef GOLDFISH_HAS_STD_SPAN
+#ifndef USING_GSL_SPAN_DEFINED
 namespace std {
 template <class ElementT, std::ptrdiff_t Extent = gsl::dynamic_extent> using span = gsl::span<ElementT, Extent>;
+constexpr const auto dynamic_extent = gsl::dynamic_extent;
 }
+#define USING_GSL_SPAN_DEFINED
+#endif
 #endif
 
 namespace goldfish
@@ -38,7 +42,14 @@ namespace goldfish
 		std::copy(from.begin(), from.end(),to.begin());
 		return from.size();
 	}
-	
+
+	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	std::span<byte, std::dynamic_extent>
+	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
+	{
+		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
+	}
+
 	template <class T> std::span<const byte> constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; }
 	template <class T> std::span<byte> constexpr to_buffer(T& t) { return{ reinterpret_cast<byte*>(&t), reinterpret_cast<byte*>(&t + 1) }; }
 	
