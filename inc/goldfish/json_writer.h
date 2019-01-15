@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+
+#include <milo/dtoa_milo.h>
+
 #include "array_ref.h"
 #include "base64_stream.h"
 #include "debug_checks_writer.h"
@@ -138,41 +141,22 @@ namespace goldfish { namespace json
 	{
 		template <class Stream> void serialize_number(Stream& s, uint64_t x)
 		{
-			if (x < 10)
-			{
-				stream::write(s, static_cast<char>('0' + x));
-			}
-			else
-			{
-				//            12345678901234567890
-				static_assert(18446744073709551615ull == std::numeric_limits<uint64_t>::max(), "The max value of uint64 fits on 20 base 10 digits");
-				uint8_t buffer[20];
-				uint8_t* it = std::end(buffer);
-				do
-				{
-					--it;
-					*it = '0' + (x % 10);
-					x /= 10;
-				} while (x != 0);
-				s.write_buffer({ it, std::end(buffer) });
-			}
+			char buffer["18446744073709551615"sv.size()];
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof buffer, x);
+			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
 		}
 		template <class Stream> void serialize_number(Stream& s, int64_t x)
 		{
-			if (x < 0)
-			{
-				stream::write(s, '-');
-				serialize_number(s, static_cast<uint64_t>(-x));
-			}
-			else
-			{
-				serialize_number(s, static_cast<uint64_t>(x));
-			}
+			char buffer["-9223372036854775808"sv.size()];
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof buffer, x);
+			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
 		}
 		template <class Stream> void serialize_number(Stream& s, double x)
 		{
-			auto string = std::to_string(x);
-			s.write_buffer({ reinterpret_cast<const byte*>(string.data()), string.size() });
+
+			char buffer[dtoa_milo::MinBufferSize];
+			std::to_chars_result result = dtoa_milo::to_chars(buffer, buffer + sizeof buffer, x);
+			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
 		}
 	}
 
