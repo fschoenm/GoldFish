@@ -13,7 +13,7 @@
 #ifdef GOLDFISH_HAS_STD_SPAN
 #include <span>
 #else
-#include <gsl/span>
+#include <span-lite/span.hpp>
 #endif
 
 using namespace std::literals::string_view_literals;
@@ -21,8 +21,9 @@ using namespace std::literals::string_view_literals;
 #ifndef GOLDFISH_HAS_STD_SPAN
 #ifndef USING_GSL_SPAN_DEFINED
 namespace std {
-template <class ElementT, std::ptrdiff_t Extent = gsl::dynamic_extent> using span = gsl::span<ElementT, Extent>;
-constexpr const auto dynamic_extent = gsl::dynamic_extent;
+using nonstd::as_writeable_bytes;
+using nonstd::dynamic_extent;
+using nonstd::span;
 }
 #define USING_GSL_SPAN_DEFINED
 #endif
@@ -30,10 +31,18 @@ constexpr const auto dynamic_extent = gsl::dynamic_extent;
 
 namespace goldfish
 {
-	template <class T, class U>
-	constexpr T narrow_cast(U&& u) noexcept
+
+	template <class ElementType, std::size_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	std::span<byte, std::dynamic_extent>
+	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
-		return static_cast<T>(std::forward<U>(u));
+		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
+	}
+
+	template <class T, class U>
+	constexpr U narrow_cast(U&& u) noexcept
+	{
+		return u;
 	}
 
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)
@@ -41,13 +50,6 @@ namespace goldfish
 		assert(from.size() == to.size());
 		std::copy(from.begin(), from.end(),to.begin());
 		return from.size();
-	}
-
-	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
-	std::span<byte, std::dynamic_extent>
-	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
-	{
-		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
 	}
 
 	template <class T> std::span<const byte> constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; }
