@@ -32,7 +32,7 @@ using nonstd::span;
 namespace goldfish
 {
 
-	template <class ElementType, std::size_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
