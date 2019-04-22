@@ -56,7 +56,7 @@ namespace goldfish { namespace stream
 		byte buffer[typical_buffer_length];
 		while (x > 0)
 		{
-			auto cb = s.read_partial_buffer({ buffer, narrow_cast<std::ptrdiff_t>(std::min<uint64_t>(sizeof(buffer), x)) });
+			auto cb = s.read_partial_buffer({ buffer, std::min(sizeof(buffer), static_cast<size_t>(x)) });
 			if (cb == 0)
 				break;
 			x -= cb;
@@ -206,8 +206,8 @@ namespace goldfish { namespace stream
 
 	inline const_buffer_ref_reader read_buffer_ref(std::span<const byte> x) { return{ x }; }
 	template <size_t N> const_buffer_ref_reader read_string_ref(const char(&s)[N]) { return string_literal_to_non_null_terminated_buffer(s); }
-	inline const_buffer_ref_reader read_string_ref(const char* s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s), narrow_cast<std::ptrdiff_t>(strlen(s)) }; }
-	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s.data()), narrow_cast<std::ptrdiff_t>(s.size()) }; }
+	inline const_buffer_ref_reader read_string_ref(const char* s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s), strlen(s) }; }
+	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s.data()), s.size() }; }
 
 	class vector_reader : public const_buffer_ref_reader
 	{
@@ -238,7 +238,7 @@ namespace goldfish { namespace stream
 		string_reader(std::string&& buffer)
 			: m_buffer(std::move(buffer))
 		{
-			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), narrow_cast<std::ptrdiff_t>(m_buffer.size()) };
+			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), m_buffer.size() };
 		}
 		string_reader(string_reader&& rhs)
 		{
@@ -360,6 +360,6 @@ namespace goldfish { namespace stream
 	{
 		byte buffer[typical_buffer_length];
 		while (auto cb = r.read_partial_buffer(buffer))
-			w.write_buffer({ buffer, narrow_cast<std::ptrdiff_t>(cb) });
+			w.write_buffer({ buffer, cb });
 	}
 }}

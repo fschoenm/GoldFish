@@ -44,7 +44,7 @@ namespace goldfish { namespace debug_checks
 		{}
 		void write_buffer(std::span<const byte> buffer)
 		{
-			if (narrow_cast<std::ptrdiff_t>(m_cb_left) < buffer.size())
+			if (static_cast<size_t>(m_cb_left) < buffer.size())
 				error_handler::on_error();
 
 			m_writer.write_buffer(buffer);

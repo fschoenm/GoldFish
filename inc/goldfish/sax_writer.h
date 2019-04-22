@@ -145,7 +145,7 @@ namespace goldfish { namespace sax
 		auto write(const std::string_view& text)
 		{
 			auto stream = start_string(text.size());
-			stream.write_buffer({ reinterpret_cast<const byte*>(text.data()), narrow_cast<std::ptrdiff_t>(text.size()) });
+			stream.write_buffer({ reinterpret_cast<const byte*>(text.data()), text.size() });
 			return stream.flush();
 		}
 
@@ -203,7 +203,7 @@ namespace goldfish { namespace sax
 			{
 				// We read the entire stream
 				auto output_stream = create_writer_with_size(cb);
-				output_stream.write_buffer({ buffer, narrow_cast<std::ptrdiff_t>(cb) });
+				output_stream.write_buffer({ buffer, cb });
 				return output_stream.flush();
 			}
 			else

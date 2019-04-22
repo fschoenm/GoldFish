@@ -110,7 +110,7 @@ namespace goldfish { namespace stream
 				auto cb = m_stream.read_partial_buffer({ m_buffer_data.data() + m_buffered.size(), m_buffer_data.data() + N });
 				if (cb == 0)
 					return false;
-				m_buffered = { m_buffered.data(), m_buffered.size() + narrow_cast<std::ptrdiff_t>(cb) };
+				m_buffered = { m_buffered.data(), m_buffered.size() + cb };
 			}
 
 			return true;

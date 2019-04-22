@@ -13,6 +13,9 @@
 #ifdef GOLDFISH_HAS_STD_SPAN
 #include <span>
 #else
+#ifndef  span_CONFIG_INDEX_TYPE
+# define span_CONFIG_INDEX_TYPE  size_t
+#endif
 #include <span-lite/span.hpp>
 #endif
 
@@ -39,12 +42,6 @@ namespace goldfish
 		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
 	}
 
-	template <class T, class U>
-	constexpr U narrow_cast(U&& u) noexcept
-	{
-		return u;
-	}
-
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)
 	{
 		assert(from.size() == to.size());
@@ -57,7 +54,7 @@ namespace goldfish
 	
 	template <class T> 
 	std::span<T> remove_front(std::span<T>& in, size_t n) {
-		assert(narrow_cast<std::ptrdiff_t>(n) <= in.size());
+		assert(n <= in.size());
 		auto ret = in.first(n);
 		in = in.subspan(n);
 		return ret;
