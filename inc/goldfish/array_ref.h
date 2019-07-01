@@ -42,6 +42,25 @@ namespace goldfish
 		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
 	}
 
+	template <class ElementType, std::ptrdiff_t Extent>
+	std::span<const byte, std::dynamic_extent>
+	as_bytes(std::span<ElementType, Extent> s) noexcept
+	{
+		return {reinterpret_cast<const byte*>(s.data()), s.size_bytes()};
+	}
+
+	template <class ElementType>
+	std::span<const byte>
+	as_bytes(const std::vector<ElementType>& s) noexcept
+	{
+		return {reinterpret_cast<const byte*>(s.data()), s.size()};
+	}
+
+	std::span<const byte, std::dynamic_extent>
+	as_bytes(std::string_view s) noexcept {
+		return {reinterpret_cast<const byte*>(s.data()), s.size()};
+	}
+
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)
 	{
 		assert(from.size() == to.size());
