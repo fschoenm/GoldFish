@@ -56,6 +56,7 @@ namespace goldfish
 		return {reinterpret_cast<const byte*>(s.data()), s.size()};
 	}
 
+	inline 
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::string_view s) noexcept {
 		return {reinterpret_cast<const byte*>(s.data()), s.size()};
