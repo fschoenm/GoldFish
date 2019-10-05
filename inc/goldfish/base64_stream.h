@@ -11,7 +11,7 @@ namespace goldfish::stream
 	template <class inner> class base64_reader
 	{
 	public:
-		base64_reader(inner&& stream)
+		base64_reader(inner&& stream) noexcept
 			: m_stream(std::move(stream))
 		{}
 
@@ -137,7 +137,7 @@ namespace goldfish::stream
 		base64_writer(inner&& stream)
 			: m_stream(std::move(stream))
 		{}
-		base64_writer(base64_writer&&) = default;
+		base64_writer(base64_writer&&) noexcept = default;
 		base64_writer(const base64_writer&) = delete;
 		base64_writer& operator = (const base64_writer&) = delete;
 

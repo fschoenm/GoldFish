@@ -124,7 +124,7 @@ namespace goldfish::cbor
 	{
 	public:
 		array(const array&) = delete;
-		array(array&&) = default;
+		array(array&&) noexcept = default;
 		array(Stream&& s, uint64_t length)
 			: m_stream(std::move(s))
 			, m_remaining_length(length)
@@ -164,7 +164,7 @@ namespace goldfish::cbor
 	{
 	public:
 		map(const map&) = delete;
-		map(map&&) = default;
+		map(map&&) noexcept = default;
 		map(Stream&& s, uint64_t remaining_length)
 			: m_stream(std::move(s))
 			, m_remaining_length(remaining_length)

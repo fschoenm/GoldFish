@@ -217,7 +217,7 @@ namespace goldfish::stream
 			m_data = m_buffer;
 		}
 		vector_reader(const vector_reader&) = delete;
-		vector_reader(vector_reader&& rhs)
+		vector_reader(vector_reader&& rhs) noexcept
 		{
 			auto index_from = rhs.m_data.data() - rhs.m_buffer.data();
 			m_buffer = std::move(rhs.m_buffer);
@@ -239,7 +239,7 @@ namespace goldfish::stream
 		{
 			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), m_buffer.size() };
 		}
-		string_reader(string_reader&& rhs)
+		string_reader(string_reader&& rhs) noexcept
 		{
 			auto index_from = rhs.m_data.data() - reinterpret_cast<const byte*>(rhs.m_buffer.data());
 			m_buffer = std::move(rhs.m_buffer);

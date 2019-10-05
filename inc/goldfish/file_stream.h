@@ -28,7 +28,7 @@ namespace goldfish::stream
 				: file_handle(path.c_str(), wmode)
 			{}
 
-			file_handle(file_handle&& rhs)
+			file_handle(file_handle&& rhs) noexcept
 				: m_fp(rhs.m_fp)
 			{
 				rhs.m_fp = nullptr;

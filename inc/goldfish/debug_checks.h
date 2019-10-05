@@ -38,7 +38,7 @@ namespace goldfish::debug_checks
 				p->lock();
 		}
 		container_base(const container_base&) = delete;
-		container_base(container_base&& rhs)
+		container_base(container_base&& rhs) noexcept
 			: m_parent_address_and_bits(rhs.m_parent_address_and_bits)
 		{
 			rhs.err_if_locked();

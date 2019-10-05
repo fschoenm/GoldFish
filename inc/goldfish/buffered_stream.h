@@ -10,7 +10,7 @@ namespace goldfish::stream
 		buffered_reader(inner&& stream)
 			: m_stream(std::move(stream))
 		{}
-		buffered_reader(buffered_reader&& rhs)
+		buffered_reader(buffered_reader&& rhs) noexcept
 			: m_stream(std::move(rhs.m_stream))
 		{
 			m_buffered = std::span<byte>(m_buffer_data.data(), rhs.m_buffered.size());
@@ -134,7 +134,7 @@ namespace goldfish::stream
 			: m_stream(std::move(stream))
 			, m_begin_free_space(m_buffer_data.data())
 		{}
-		buffered_writer(buffered_writer&& rhs)
+		buffered_writer(buffered_writer&& rhs) noexcept
 			: m_buffer_data(rhs.m_buffer_data)
 			, m_begin_free_space(m_buffer_data.data() + std::distance(rhs.m_buffer_data.data(), rhs.m_begin_free_space))
 			, m_stream(std::move(rhs.m_stream))
