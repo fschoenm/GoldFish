@@ -34,8 +34,12 @@ using nonstd::span;
 
 namespace goldfish
 {
-
-	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	#ifdef GOLDFISH_HAS_STD_SPAN
+	using extend_t = size_t;
+	#else // GOLDFISH_HAS_STD_SPAN
+	using extend_t = std::ptrdiff_t;
+	#endif // GOLDFISH_HAS_STD_SPAN
+	template <class ElementType, extend_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
