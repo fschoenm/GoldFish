@@ -4,7 +4,7 @@
 #include <cassert>
 #include <exception>
 
-namespace goldfish { namespace debug_checks
+namespace goldfish::debug_checks
 {
 	struct no_check {
 		static void on_error() {}
@@ -112,4 +112,4 @@ namespace goldfish { namespace debug_checks
 
 	template <class T> std::enable_if_t< has_unlock_parent<T>::value, void> unlock_parent(T& t) { t.unlock_parent(); }
 	template <class T> std::enable_if_t<!has_unlock_parent<T>::value, void> unlock_parent(T& t) { }
-}}
+} // namespace goldfish::debug_checks

@@ -10,7 +10,7 @@
 #include "sax_writer.h"
 #include "stream.h"
 
-namespace goldfish { namespace json
+namespace goldfish::json
 {
 	struct invalid_key_type : exception { using exception::exception; };
 	template <class Stream> class document_writer;
@@ -158,7 +158,7 @@ namespace goldfish { namespace json
 			std::to_chars_result result = dtoa_milo::to_chars(buffer, buffer + sizeof buffer, x);
 			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
 		}
-	}
+	} // namespace details
 
 	template <class Stream> class map_writer
 	{
@@ -322,4 +322,4 @@ namespace goldfish { namespace json
 		stream::write(m_stream, ':');
 		return{ stream::ref(m_stream) };
 	}
-}}
+} // namespace goldfish::json

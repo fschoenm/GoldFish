@@ -4,7 +4,7 @@
 #include "array_ref.h"
 #include "tags.h"
 
-namespace goldfish { namespace debug_checks
+namespace goldfish::debug_checks
 {
 	template <class error_handler, class inner> class document_writer;
 	template <class error_handler, class inner> document_writer<error_handler, std::decay_t<inner>> add_write_checks_impl(container_base<error_handler>* parent, inner&& t);
@@ -283,4 +283,4 @@ namespace goldfish { namespace debug_checks
 	{
 		return std::forward<Document>(t);
 	}
-}}
+} // namespace goldfish::debug_checks

@@ -14,7 +14,7 @@ namespace goldfish
 	{
 		struct ill_formatted_json_data : ill_formatted { using ill_formatted::ill_formatted; };
 		template <class Stream> std::variant<uint64_t, int64_t, double> read_number(Stream& s, char first);
-	}
+	} // namespace json
 	struct integer_overflow_while_casting : exception { integer_overflow_while_casting() : exception("Integer too large") {} };
 
 	template <class DocTraitsT>
@@ -359,4 +359,4 @@ namespace goldfish
 			seek_to_end(x.read_value());
 		}
 	}
-}
+} // namespace goldfish

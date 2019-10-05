@@ -3,7 +3,7 @@
 #include "array_ref.h"
 #include "stream.h"
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	struct ill_formatted_base64_data : ill_formatted { using ill_formatted::ill_formatted; };
 
@@ -231,4 +231,4 @@ namespace goldfish { namespace stream
 
 	template <class inner> enable_if_reader_t<inner, base64_reader<std::decay_t<inner>>> decode_base64(inner&& stream) { return{ std::forward<inner>(stream) }; }
 	template <class inner> enable_if_writer_t<inner, base64_writer<std::decay_t<inner>>> encode_base64_to(inner&& stream) { return{ std::forward<inner>(stream) }; }
-}}
+} // namespace goldfish::stream

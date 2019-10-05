@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <string_view>
 
-namespace goldfish { namespace sax
+namespace goldfish::sax
 {
 	template <class inner> class document_writer;
 	template <class inner> document_writer<std::decay_t<inner>> make_writer(inner&& writer);
@@ -220,4 +220,4 @@ namespace goldfish { namespace sax
 	};
 
 	template <class inner> document_writer<std::decay_t<inner>> make_writer(inner&& writer) { return{ std::forward<inner>(writer) }; }
-}}
+} // namespace goldfish::sax

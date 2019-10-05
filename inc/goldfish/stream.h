@@ -7,7 +7,7 @@
 #include "common.h"
 #include <optional>
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	struct unexpected_end_of_stream : ill_formatted { unexpected_end_of_stream() : ill_formatted("Unexpected end of stream") {} };
 
@@ -362,4 +362,4 @@ namespace goldfish { namespace stream
 		while (auto cb = r.read_partial_buffer(buffer))
 			w.write_buffer({ buffer, cb });
 	}
-}}
+} // namespace goldfish::stream

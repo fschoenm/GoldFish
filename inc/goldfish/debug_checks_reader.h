@@ -6,7 +6,7 @@
 #include "tags.h"
 #include <type_traits>
 
-namespace goldfish { namespace debug_checks
+namespace goldfish::debug_checks
 {
 	template <class error_handler, class T, class _tag> class string;
 	template <class error_handler, class T> class array;
@@ -181,4 +181,4 @@ namespace goldfish { namespace debug_checks
 	{
 		return std::forward<Document>(t);
 	}
-}}
+} // namespace goldfish::debug_checks

@@ -4,7 +4,7 @@
 #include "common.h"
 #include <type_traits>
 
-namespace goldfish { namespace tags
+namespace goldfish::tags
 {
 	template <class T> struct is_tag : std::false_type {};
 	struct binary {};         template <> struct is_tag<binary> : std::true_type {};
@@ -50,4 +50,4 @@ namespace goldfish { namespace tags
 		using type = typename type_with_tag_helper<tag, has_tag<Head, tag>::value, Head, Tail...>::type;
 	};
 	template <class tag, class... T> using type_with_tag_t = typename type_with_tag<tag, T...>::type;
-}}
+} // namespace goldfish::tags

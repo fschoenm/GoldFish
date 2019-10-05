@@ -8,7 +8,7 @@
 #include "sax_writer.h"
 #include "stream.h"
 
-namespace goldfish { namespace cbor
+namespace goldfish::cbor
 {
 	namespace details
 	{
@@ -39,7 +39,7 @@ namespace goldfish { namespace cbor
 				stream::write(s, to_big_endian(x));
 			}
 		}
-	}
+	} // namespace details
 	
 	template <class Stream, byte major> class indefinite_stream_writer
 	{
@@ -245,4 +245,4 @@ namespace goldfish { namespace cbor
 		stream::write(m_stream, static_cast<byte>((5 << 5) | 31));
 		return{ std::move(m_stream) };
 	}
-}}
+} // namespace goldfish::cbor

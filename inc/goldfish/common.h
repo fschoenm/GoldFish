@@ -70,4 +70,4 @@ namespace goldfish
 
 	// Used for all cases where we need to read from a stream in chunks (default implementation of seek, stream copy, etc...)
 	static const int typical_buffer_length = 8 * 1024;
-}
+} // namespace goldfish

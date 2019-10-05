@@ -11,7 +11,7 @@
 #include <charconv>
 #include <cstdlib>
 
-namespace goldfish { namespace json
+namespace goldfish::json
 {
 	struct integer_overflow_in_json : ill_formatted_json_data { using ill_formatted_json_data::ill_formatted_json_data; };
 
@@ -67,7 +67,7 @@ namespace goldfish { namespace json
 					throw ill_formatted_json_data{ "Unexpected JSON document value" };
 			}
 		}
-	}
+	} // namespace details
 
 	class byte_string
 	{
@@ -463,4 +463,4 @@ namespace goldfish { namespace json
 		return debug_checks::add_read_checks(read_no_debug_check(std::forward<Stream>(s)), e);
 	}
 	template <class Stream> auto read(Stream&& s) { return read(std::forward<Stream>(s), debug_checks::default_error_handler{}); }
-}}
+} // namespace goldfish::json

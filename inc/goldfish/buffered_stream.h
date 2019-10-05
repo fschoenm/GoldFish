@@ -2,7 +2,7 @@
 
 #include "stream.h"
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	template <size_t N, class inner> class buffered_reader
 	{
@@ -205,4 +205,4 @@ namespace goldfish { namespace stream
 	};
 	template <size_t N, class inner> enable_if_reader_t<inner, buffered_reader<N, std::decay_t<inner>>> buffer(inner&& stream) { return{ std::forward<inner>(stream) }; }
 	template <size_t N, class inner> enable_if_writer_t<inner, buffered_writer<N, std::decay_t<inner>>> buffer(inner&& stream) { return{ std::forward<inner>(stream) }; }
-}}
+} // namespace goldfish::stream

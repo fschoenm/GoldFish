@@ -96,4 +96,4 @@ namespace goldfish
 		assert(text[N - 1] == 0);
 		return{ reinterpret_cast<const byte*>(text), N - 1 };
 	}
-}
+} // namespace goldfish

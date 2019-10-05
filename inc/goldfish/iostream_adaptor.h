@@ -4,7 +4,7 @@
 #include "array_ref.h"
 #include "stream.h"
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	class istream_reader_ref
 	{
@@ -127,7 +127,7 @@ namespace goldfish { namespace stream
 	{
 		return make_istream_on_streambuf(make_streambuf<N>(std::forward<inner>(reader)));
 	}
-}}
+} // namespace goldfish::stream
 
 template <class Stream> goldfish::stream::enable_if_reader_t<Stream, std::ostream&> operator << (std::ostream& s, Stream&& reader)
 {

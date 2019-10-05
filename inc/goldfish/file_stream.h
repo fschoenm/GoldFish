@@ -4,7 +4,7 @@
 #include "common.h"
 #include <string>
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	namespace details
 	{
@@ -45,7 +45,7 @@ namespace goldfish { namespace stream
 		private:
 			FILE* m_fp;
 		};
-	}
+	} // namespace details
 
 	class file_reader
 	{
@@ -101,4 +101,4 @@ namespace goldfish { namespace stream
 	private:
 		details::file_handle m_file;
 	};
-}}
+} // namespace goldfish::stream

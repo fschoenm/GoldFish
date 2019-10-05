@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace goldfish { namespace stream
+namespace goldfish::stream
 {
 	struct reader_writer_stream_closed : exception { using exception::exception; };
 
@@ -167,4 +167,4 @@ namespace goldfish { namespace stream
 			writer_on_reader_writer{inner}
 		};
 	}
-}}
+} // namespace goldfish::stream
