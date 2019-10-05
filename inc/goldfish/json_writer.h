@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <milo/dtoa_milo.h>
+//#include <milo/dtoa_milo.h>
 
 #include "array_ref.h"
 #include "base64_stream.h"
@@ -154,9 +154,9 @@ namespace goldfish::json
 		template <class Stream> void serialize_number(Stream& s, double x)
 		{
 
-			char buffer[dtoa_milo::MinBufferSize];
-			std::to_chars_result result = dtoa_milo::to_chars(buffer, buffer + sizeof buffer, x);
-			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
+			//char buffer[dtoa_milo::MinBufferSize];
+			//std::to_chars_result result = dtoa_milo::to_chars(buffer, buffer + sizeof buffer, x);
+			//s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
 		}
 	} // namespace details
 
@@ -224,14 +224,14 @@ namespace goldfish::json
 			return m_stream.flush();
 		}
 
-		auto start_binary(uint64_t cb) { return start_binary(); }
-		auto start_string(uint64_t cb) { return start_string(); }
+		auto start_binary(uint64_t  /*cb*/) { return start_binary(); }
+		auto start_string(uint64_t  /*cb*/) { return start_string(); }
 		binary_writer<Stream> start_binary() { return{ std::move(m_stream) }; }
 		text_writer<Stream> start_string() { return{ std::move(m_stream) }; }
 
-		array_writer<Stream> start_array(uint64_t size) { throw invalid_key_type{ "An array cannot be a JSON key" }; }
+		array_writer<Stream> start_array(uint64_t  /*size*/) { throw invalid_key_type{ "An array cannot be a JSON key" }; }
 		array_writer<Stream> start_array() { throw invalid_key_type{ "An array cannot be a JSON key" }; }
-		map_writer<Stream> start_map(uint64_t size) { throw invalid_key_type{ "A map cannot be a JSON key" }; }
+		map_writer<Stream> start_map(uint64_t  /*size*/) { throw invalid_key_type{ "A map cannot be a JSON key" }; }
 		map_writer<Stream> start_map() { throw invalid_key_type{ "A map cannot be a JSON key" }; }
 
 	private:
@@ -275,15 +275,15 @@ namespace goldfish::json
 			return m_stream.flush();
 		}
 
-		auto start_binary(uint64_t cb) { return start_binary(); }
-		auto start_string(uint64_t cb) { return start_string(); }
+		auto start_binary(uint64_t  /*cb*/) { return start_binary(); }
+		auto start_string(uint64_t  /*cb*/) { return start_string(); }
 		binary_writer<Stream> start_binary() { return{ std::move(m_stream) }; }
 		text_writer<Stream> start_string() { return{ std::move(m_stream) }; }
 
-		auto start_array(uint64_t size) { return start_array(); }
+		auto start_array(uint64_t  /*size*/) { return start_array(); }
 		array_writer<Stream> start_array() { return{ std::move(m_stream) }; }
 
-		auto start_map(uint64_t size) { return start_map(); }
+		auto start_map(uint64_t  /*size*/) { return start_map(); }
 		map_writer<Stream> start_map() { return{ std::move(m_stream) }; }
 
 	private:

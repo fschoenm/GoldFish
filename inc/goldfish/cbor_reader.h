@@ -246,11 +246,11 @@ namespace goldfish::cbor
 	template <class Stream> struct read_helper
 	{
 		template <uint64_t value> static std::optional<document<Stream>> fn_uint(Stream&&, byte) { return document<Stream>(value); }
-		static std::optional<document<Stream>> fn_small_uint(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(first_byte & 31)); };
-		static std::optional<document<Stream>> fn_uint_8(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(stream::read<uint8_t>(s))); }
-		static std::optional<document<Stream>> fn_uint_16(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint16_t>(s)))); }
-		static std::optional<document<Stream>> fn_uint_32(Stream&& s, byte first_byte) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint32_t>(s)))); }
-		static std::optional<document<Stream>> fn_uint_64(Stream&& s, byte first_byte) { return document<Stream>(from_big_endian(stream::read<uint64_t>(s))); }
+		static std::optional<document<Stream>> fn_small_uint(Stream&&  /*s*/, byte first_byte) { return document<Stream>(static_cast<uint64_t>(first_byte & 31)); };
+		static std::optional<document<Stream>> fn_uint_8(Stream&& s, byte  /*first_byte*/) { return document<Stream>(static_cast<uint64_t>(stream::read<uint8_t>(s))); }
+		static std::optional<document<Stream>> fn_uint_16(Stream&& s, byte  /*first_byte*/) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint16_t>(s)))); }
+		static std::optional<document<Stream>> fn_uint_32(Stream&& s, byte  /*first_byte*/) { return document<Stream>(static_cast<uint64_t>(from_big_endian(stream::read<uint32_t>(s)))); }
+		static std::optional<document<Stream>> fn_uint_64(Stream&& s, byte  /*first_byte*/) { return document<Stream>(from_big_endian(stream::read<uint64_t>(s))); }
 		static std::optional<document<Stream>> fn_neg_int(Stream&& s, byte first_byte)
 		{
 			auto x = read_integer(static_cast<byte>(first_byte & 31), s);
