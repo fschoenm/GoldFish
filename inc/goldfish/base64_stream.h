@@ -119,7 +119,7 @@ namespace goldfish { namespace stream
 				64,64,64,64,64,64,64,64,64,64,
 				64,64,64,64,64,64
 			};
-			static_assert(sizeof(lookup_table) == 256, "");
+			static_assert(sizeof(lookup_table) == 256 );
 			auto result = lookup_table[c];
 			if (result >= 64)
 				throw ill_formatted_base64_data{ "Invalid character in base64 stream" };
