@@ -5,7 +5,6 @@
 #include "sax_reader.h"
 #include "stream.h"
 #include "tags.h"
-#include <cmath>
 #include <optional>
 #include <variant>
 
@@ -240,7 +239,7 @@ namespace goldfish::cbor
 		double val;
 		if (exp == 0) val = ldexp(mant, -24);
 		else if (exp != 31) val = ldexp(mant + 1024, exp - 25);
-		else val = mant == 0 ? INFINITY : NAN;
+		else val = mant == 0 ? std::numeric_limits<double>::infinity() : std::numeric_limits<double>::quiet_NaN();
 		return half & 0x8000 ? -val : val;
 	}
 
