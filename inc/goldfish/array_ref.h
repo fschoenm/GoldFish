@@ -5,7 +5,7 @@
 #endif
 
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include "common.h"
 #include <iterator>
 #include <vector>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <assert.h>
+#include <cassert>
 #include <exception>
 
 namespace goldfish { namespace debug_checks
