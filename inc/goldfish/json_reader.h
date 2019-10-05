@@ -6,8 +6,6 @@
 #include "stream.h"
 #include "tags.h"
 #include <charconv>
-#include <cmath>
-#include <cstdlib>
 #include <optional>
 #include <variant>
 
