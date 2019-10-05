@@ -2,12 +2,12 @@
 
 #include "common.h"
 #include "debug_checks_reader.h"
-#include <optional>
 #include "sax_reader.h"
 #include "stream.h"
 #include "tags.h"
-#include <variant>
 #include <cmath>
+#include <optional>
+#include <variant>
 
 namespace goldfish::cbor
 {

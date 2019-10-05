@@ -1,7 +1,7 @@
 #pragma once
 
-#include "debug_checks.h"
 #include "array_ref.h"
+#include "debug_checks.h"
 #include "tags.h"
 
 namespace goldfish::debug_checks

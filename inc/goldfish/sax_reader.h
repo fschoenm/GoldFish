@@ -1,10 +1,10 @@
 #pragma once
 
-#include "tags.h"
-#include "stream.h"
-#include <optional>
 #include "base64_stream.h"
 #include "buffered_stream.h"
+#include "stream.h"
+#include "tags.h"
+#include <optional>
 #include <type_traits>
 #include <variant>
 

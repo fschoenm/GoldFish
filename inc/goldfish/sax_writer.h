@@ -2,8 +2,8 @@
 
 #include "stream.h"
 #include "tags.h"
-#include <type_traits>
 #include <string_view>
+#include <type_traits>
 
 namespace goldfish::sax
 {

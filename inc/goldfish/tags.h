@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
 #include "common.h"
+#include <cstdint>
 #include <type_traits>
 
 namespace goldfish::tags

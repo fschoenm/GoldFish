@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstring>
-#include <array>
-#include <vector>
 #include "array_ref.h"
 #include "common.h"
+#include <array>
+#include <cstring>
 #include <optional>
+#include <vector>
 
 namespace goldfish::stream
 {

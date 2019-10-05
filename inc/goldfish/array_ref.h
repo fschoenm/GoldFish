@@ -4,9 +4,9 @@
 #define GOLDFISH_HAS_STD_SPAN
 #endif
 
+#include "common.h"
 #include <array>
 #include <cassert>
-#include "common.h"
 #include <iterator>
 #include <vector>
 
