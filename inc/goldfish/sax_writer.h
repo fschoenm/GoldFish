@@ -203,7 +203,7 @@ namespace goldfish::sax
 			{
 				// We read the entire stream
 				auto output_stream = create_writer_with_size(cb);
-				output_stream.write_buffer({ buffer, cb });
+				output_stream.write_buffer(std::span<const byte>(buffer).first(cb));
 				return output_stream.flush();
 			}
 			else

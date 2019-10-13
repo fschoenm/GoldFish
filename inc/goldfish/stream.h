@@ -55,7 +55,7 @@ namespace goldfish::stream
 		byte buffer[typical_buffer_length];
 		while (x > 0)
 		{
-			auto cb = s.read_partial_buffer({ buffer, std::min(sizeof(buffer), static_cast<size_t>(x)) });
+			auto cb = s.read_partial_buffer(std::span<byte>(buffer).first(std::min(sizeof(buffer), static_cast<size_t>(x))));
 			if (cb == 0)
 				break;
 			x -= cb;
@@ -220,10 +220,7 @@ namespace goldfish::stream
 		{
 			auto index_from = rhs.m_data.data() - rhs.m_buffer.data();
 			m_buffer = std::move(rhs.m_buffer);
-			m_data = {
-				m_buffer.data() + index_from,
-				rhs.m_data.size()
-			};
+			m_data = std::span<const byte>(m_buffer).subspan(index_from, rhs.m_data.size());
 		}
 		vector_reader& operator = (const vector_reader&) = delete;
 		vector_reader& operator = (vector_reader&&) = delete;
@@ -242,10 +239,7 @@ namespace goldfish::stream
 		{
 			auto index_from = rhs.m_data.data() - reinterpret_cast<const byte*>(rhs.m_buffer.data());
 			m_buffer = std::move(rhs.m_buffer);
-			m_data = {
-				reinterpret_cast<const byte*>(m_buffer.data()) + index_from,
-				rhs.m_data.size()
-			};
+			m_data = as_bytes(std::string_view(m_buffer)).subspan(index_from, rhs.m_data.size());
 		}
 		string_reader(const string_reader&) = delete;
 		string_reader& operator = (const string_reader&) = delete;
@@ -358,6 +352,6 @@ namespace goldfish::stream
 	{
 		byte buffer[typical_buffer_length];
 		while (auto cb = r.read_partial_buffer(buffer))
-			w.write_buffer({ buffer, cb });
+			w.write_buffer(std::span<const byte>(buffer).first(cb));
 	}
 } // namespace goldfish::stream
