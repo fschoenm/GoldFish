@@ -34,19 +34,14 @@ using nonstd::span;
 
 namespace goldfish
 {
-	#ifdef GOLDFISH_HAS_STD_SPAN
-	using extend_t = size_t;
-	#else // GOLDFISH_HAS_STD_SPAN
-	using extend_t = std::ptrdiff_t;
-	#endif // GOLDFISH_HAS_STD_SPAN
-	template <class ElementType, extend_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	template <class ElementType, size_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
 		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
-	template <class ElementType, std::ptrdiff_t Extent>
+	template <class ElementType, size_t Extent>
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::span<ElementType, Extent> s) noexcept
 	{
@@ -89,11 +84,5 @@ namespace goldfish
 		T& ret = in[0];
 		in = in.subspan(1);
 		return ret;
-	}
-	template <size_t N> constexpr std::span<const byte> string_literal_to_non_null_terminated_buffer(const char(&text)[N])
-	{
-		static_assert(N > 0, "expect null terminated strings");
-		assert(text[N - 1] == 0);
-		return{ reinterpret_cast<const byte*>(text), N - 1 };
 	}
 } // namespace goldfish
