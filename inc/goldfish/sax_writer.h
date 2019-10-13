@@ -145,7 +145,7 @@ namespace goldfish::sax
 		auto write(const std::string_view& text)
 		{
 			auto stream = start_string(text.size());
-			stream.write_buffer({ reinterpret_cast<const byte*>(text.data()), text.size() });
+			stream.write_buffer(as_bytes(text));
 			return stream.flush();
 		}
 

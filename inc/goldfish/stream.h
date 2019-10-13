@@ -71,7 +71,7 @@ namespace goldfish::stream
 	template <class T, class Stream> std::enable_if_t<is_reader<std::decay_t<Stream>>::value && !has_read<Stream, T>::value && std::is_standard_layout<T>::value, T> read(Stream& s)
 	{
 		T t;
-		if (read_full_buffer(s, { reinterpret_cast<byte*>(&t), sizeof(t) }) != sizeof(t))
+		if (read_full_buffer(s, as_bytes(std::span<const T>(t))) != sizeof(T))
 			throw unexpected_end_of_stream();
 		return t;
 	}
@@ -79,7 +79,7 @@ namespace goldfish::stream
 	template <class T, class stream> auto write(stream& s, const T& t) -> decltype(s.write(t)) { return s.write(t); }
 	template <class T, class stream> enable_if_writer_t<stream, std::enable_if_t<std::is_standard_layout<T>::value && !has_write<stream, T>::value, void>> write(stream& s, const T& t)
 	{
-		s.write_buffer({ reinterpret_cast<const byte*>(&t), sizeof(t) });
+		s.write_buffer(as_bytes(std::span<const T>(t)));
 	}
 
 	template <class inner> class ref_reader;
@@ -204,9 +204,8 @@ namespace goldfish::stream
 	};
 
 	inline const_buffer_ref_reader read_buffer_ref(std::span<const byte> x) { return{ x }; }
-	template <size_t N> const_buffer_ref_reader read_string_ref(const char(&s)[N]) { return string_literal_to_non_null_terminated_buffer(s); }
-	inline const_buffer_ref_reader read_string_ref(const char* s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s), strlen(s) }; }
-	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return std::span<const byte>{ reinterpret_cast<const uint8_t*>(s.data()), s.size() }; }
+	inline const_buffer_ref_reader read_string_ref(const char* s) { return as_bytes(std::string_view(s)); }
+	inline const_buffer_ref_reader read_string_ref(const std::string& s) { return as_bytes(std::string_view(s)); }
 
 	class vector_reader : public const_buffer_ref_reader
 	{
@@ -237,7 +236,7 @@ namespace goldfish::stream
 		string_reader(std::string&& buffer)
 			: m_buffer(std::move(buffer))
 		{
-			m_data = { reinterpret_cast<const byte*>(m_buffer.data()), m_buffer.size() };
+			m_data = as_bytes(std::string_view(m_buffer));
 		}
 		string_reader(string_reader&& rhs) noexcept
 		{

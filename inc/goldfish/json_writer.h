@@ -79,7 +79,7 @@ namespace goldfish::json
 					case U:
 					{
 						char data[6] = { '\\', 'u', '0', '0', "0123456789ABCDEF"[*it / 16], "0123456789ABCDEF"[*it % 16] };
-						m_stream.write_buffer({ reinterpret_cast<const byte*>(data), 6 });
+						m_stream.write_buffer(as_bytes(data));
 					}
 					break;
 				}
@@ -189,13 +189,13 @@ namespace goldfish::json
 		{}
 		auto write(bool x)
 		{
-			if (x) m_stream.write_buffer(string_literal_to_non_null_terminated_buffer("\"true\""));
-			else   m_stream.write_buffer(string_literal_to_non_null_terminated_buffer("\"false\""));
+			if (x) m_stream.write_buffer(as_bytes(R"("true")"sv));
+			else   m_stream.write_buffer(as_bytes(R"("false")"sv));
 			return m_stream.flush();
 		}
 		auto write(std::nullptr_t)
 		{
-			m_stream.write_buffer(string_literal_to_non_null_terminated_buffer("\"null\""));
+			m_stream.write_buffer(as_bytes(R"("null")"sv));
 			return m_stream.flush();
 		}
 		auto write(undefined)
@@ -246,13 +246,13 @@ namespace goldfish::json
 		{}
 		auto write(bool x)
 		{
-			if (x) m_stream.write_buffer({ reinterpret_cast<const byte*>("true"), 4 });
-			else   m_stream.write_buffer({ reinterpret_cast<const byte*>("false"), 5 });
+			if (x) m_stream.write_buffer(as_bytes("true"sv));
+			else   m_stream.write_buffer(as_bytes("false"sv));
 			return m_stream.flush();
 		}
 		auto write(std::nullptr_t)
 		{
-			m_stream.write_buffer({ reinterpret_cast<const byte*>("null"), 4 });
+			m_stream.write_buffer(as_bytes("null"sv));
 			return m_stream.flush();
 		}
 		auto write(undefined)

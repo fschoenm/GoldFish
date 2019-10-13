@@ -58,7 +58,7 @@ namespace goldfish::stream
 		template <class T, size_t alignment> T read_helper(std::integral_constant<size_t, alignment>, std::bool_constant<false>)
 		{
 			T t;
-			if (read_full_buffer(*this, { reinterpret_cast<byte*>(&t), sizeof(t) }) != sizeof(t))
+			if (read_full_buffer(*this, as_bytes(std::span<const T>(t))) != sizeof(T))
 				throw unexpected_end_of_stream();
 			return t;
 		}
