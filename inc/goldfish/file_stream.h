@@ -50,16 +50,16 @@ namespace goldfish::stream
 	class file_reader
 	{
 	public:
-		file_reader(const char* path)
+		explicit file_reader(const char* path)
 			: m_file(path, "rb")
 		{}
-		file_reader(const wchar_t* path)
+		explicit file_reader(const wchar_t* path)
 			: m_file(path, L"rb")
 		{}
-		file_reader(const std::string& path)
+		explicit file_reader(const std::string& path)
 			: m_file(path, "rb")
 		{}
-		file_reader(const std::wstring& path)
+		explicit file_reader(const std::wstring& path)
 			: m_file(path, L"rb")
 		{}
 		size_t read_partial_buffer(std::span<byte> data)
@@ -79,16 +79,16 @@ namespace goldfish::stream
 	class file_writer
 	{
 	public:
-		file_writer(const char* path)
+		explicit file_writer(const char* path)
 			: m_file(path, "wb")
 		{}
-		file_writer(const wchar_t* path)
+		explicit file_writer(const wchar_t* path)
 			: m_file(path, L"wb")
 		{}
-		file_writer(const std::string& path)
+		explicit file_writer(const std::string& path)
 			: m_file(path, "wb")
 		{}
-		file_writer(const std::wstring& path)
+		explicit file_writer(const std::wstring& path)
 			: m_file(path, L"wb")
 		{}
 
