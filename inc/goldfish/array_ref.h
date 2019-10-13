@@ -19,7 +19,7 @@
 #include <span-lite/span.hpp>
 #endif
 
-using namespace std::literals::string_view_literals;
+using namespace std::literals; //NOLINT(google-global-names-in-headers)
 
 #ifndef GOLDFISH_HAS_STD_SPAN
 #ifndef USING_GSL_SPAN_DEFINED
@@ -43,27 +43,27 @@ namespace goldfish
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
-		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
+		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
 	template <class ElementType, std::ptrdiff_t Extent>
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::span<ElementType, Extent> s) noexcept
 	{
-		return {reinterpret_cast<const byte*>(s.data()), s.size_bytes()};
+		return {reinterpret_cast<const byte*>(s.data()), s.size_bytes()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
 	template <class ElementType>
 	std::span<const byte>
 	as_bytes(const std::vector<ElementType>& s) noexcept
 	{
-		return {reinterpret_cast<const byte*>(s.data()), s.size()};
+		return {reinterpret_cast<const byte*>(s.data()), s.size()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
 	inline 
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::string_view s) noexcept {
-		return {reinterpret_cast<const byte*>(s.data()), s.size()};
+		return {reinterpret_cast<const byte*>(s.data()), s.size()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)
@@ -73,8 +73,8 @@ namespace goldfish
 		return from.size();
 	}
 
-	template <class T> std::span<const byte> constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; }
-	template <class T> std::span<byte> constexpr to_buffer(T& t) { return{ reinterpret_cast<byte*>(&t), reinterpret_cast<byte*>(&t + 1) }; }
+	template <class T> std::span<const byte> constexpr to_buffer(const T& t) { return{ reinterpret_cast<const byte*>(&t), reinterpret_cast<const byte*>(&t + 1) }; } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	template <class T> std::span<byte> constexpr to_buffer(T& t) { return{ reinterpret_cast<byte*>(&t), reinterpret_cast<byte*>(&t + 1) }; } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	
 	template <class T> 
 	std::span<T> remove_front(std::span<T>& in, size_t n) {
