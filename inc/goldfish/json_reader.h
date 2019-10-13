@@ -379,8 +379,8 @@ namespace goldfish::json
 		if (negative)
 			*buffer_iterator++ = '-';
 
-		char* start = negative ? buffer.data() + 1 : buffer.data();
-		std::to_chars_result to_char_result = std::to_chars(start, buffer.data() + buffer.size(), predecimal_digits);
+		char* start = negative ? std::begin(buffer) + 1 : std::begin(buffer);
+		std::to_chars_result to_char_result = std::to_chars(start, std::end(buffer), predecimal_digits);
 		assert(static_cast<std::underlying_type_t<decltype(to_char_result.ec)>>(to_char_result.ec) == 0);
 		buffer_iterator += (to_char_result.ptr - start);
 

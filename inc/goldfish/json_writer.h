@@ -142,21 +142,21 @@ namespace goldfish::json
 		template <class Stream> void serialize_number(Stream& s, uint64_t x)
 		{
 			char buffer["18446744073709551615"sv.size()];
-			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof buffer, x);
-			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
+			std::to_chars_result result = std::to_chars(std::begin(buffer), std::end(buffer), x);
+			s.write_buffer(as_bytes(std::span<const char>(buffer).first(result.ptr - std::begin(buffer))));
 		}
 		template <class Stream> void serialize_number(Stream& s, int64_t x)
 		{
 			char buffer["-9223372036854775808"sv.size()];
-			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof buffer, x);
-			s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
+			std::to_chars_result result = std::to_chars(std::begin(buffer), std::end(buffer), x);
+			s.write_buffer(as_bytes(std::span<const char>(buffer).first(result.ptr - std::begin(buffer))));
 		}
 		template <class Stream> void serialize_number(Stream& s, double x)
 		{
 
 			//char buffer[dtoa_milo::MinBufferSize];
-			//std::to_chars_result result = dtoa_milo::to_chars(buffer, buffer + sizeof buffer, x);
-			//s.write_buffer(std::span<const byte>(reinterpret_cast<const byte*>(buffer), result.ptr - buffer));
+			//std::to_chars_result result = dtoa_milo::to_chars(std::begin(buffer), std::end(buffer), x);
+			//s.write_buffer(as_bytes(std::span<const char>(buffer).first(result.ptr - std::begin(buffer))));
 		}
 	} // namespace details
 
