@@ -98,14 +98,14 @@ namespace goldfish::stream
 		{
 			assert(s <= N);
 			memmove(m_buffer_data.data(), m_buffered.data(), m_buffered.size());
-			m_buffered = { m_buffer_data.data(), m_buffered.size() };
+			m_buffered = std::span<byte>(m_buffer_data).first(m_buffered.size());
 
 			while (m_buffered.size() < s)
 			{
-				auto cb = m_stream.read_partial_buffer({ m_buffer_data.data() + m_buffered.size(), m_buffer_data.data() + N });
+				auto cb = m_stream.read_partial_buffer(std::span<byte>(m_buffer_data).last(m_buffered.size()));
 				if (cb == 0)
 					return false;
-				m_buffered = { m_buffered.data(), m_buffered.size() + cb };
+				m_buffered = std::span<byte>(m_buffer_data).first(m_buffered.size() + cb);
 			}
 
 			return true;
