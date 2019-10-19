@@ -36,7 +36,7 @@ namespace goldfish::stream
 			return original_size - data.size();
 		}
 	private:
-		void read_from_already_parsed(std::span<byte>& data)
+		void read_from_already_parsed(std::span<byte>& data) // NOLINT(google-runtime-references)
 		{
 			auto cb_to_copy = static_cast<uint8_t>(std::min<size_t>(data.size(), m_cb_already_parsed));
 			copy_span(std::span<const byte>{ m_already_parsed.data(), m_already_parsed.data() + cb_to_copy }, remove_front(data, cb_to_copy));

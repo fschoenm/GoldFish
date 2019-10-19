@@ -175,7 +175,7 @@ namespace goldfish::json
 	private:
 		static const byte invalid_char = 0xFF;
 		static const byte end_of_stream = 0xFE;
-		void copy_from_converted(std::span<byte>& buffer)
+		void copy_from_converted(std::span<byte>& buffer) // NOLINT(google-runtime-references)
 		{
 			while (m_converted.front() != invalid_char && !buffer.empty())
 			{
