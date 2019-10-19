@@ -74,7 +74,7 @@ namespace goldfish::stream
 	template <class T, class Stream> std::enable_if_t<is_reader<std::decay_t<Stream>>::value && !has_read<Stream, T>::value && std::is_standard_layout<T>::value, T> read(Stream& s)
 	{
 		T t;
-		if (read_full_buffer(s, as_bytes(std::span<const T>(t))) != sizeof(T))
+		if (read_full_buffer(s, goldfish::as_writeable_bytes(std::span<T>(&t, 1))) != sizeof(T))
 			throw unexpected_end_of_stream();
 		return t;
 	}
