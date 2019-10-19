@@ -91,6 +91,26 @@ namespace goldfish
 	as_bytes(std::string_view s) noexcept {
 		return { reinterpret_cast<const byte*>(s.data()), s.size() }; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
+
+	template <class DstT>
+	std::enable_if_t<sizeof(DstT) == 1, DstT>
+	as(std::span<const byte> s) noexcept {
+		assert(s.size() >= sizeof(DstT));
+		return static_cast<DstT>(s[0]);
+	}
+
+	template <class DstT>
+	std::enable_if_t<sizeof(DstT) != 1, DstT>
+	as(std::span<const byte> s) noexcept {
+		assert(s.size() >= sizeof(DstT));
+		DstT dst;
+    	std::memcpy(&dst, s.data(), sizeof(DstT));
+    	return dst;
+	}
+
+	template <>
+	std::string_view inline as<std::string_view>(std::span<const byte> s) noexcept {
+		return { reinterpret_cast<const char*>(s.data()), s.size() }; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)

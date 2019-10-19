@@ -256,9 +256,9 @@ namespace goldfish
 				{
 					byte buffer[6];
 					auto cb = read_full_buffer(x, buffer);
-					if (cb == 4 && std::equal(buffer, buffer + 4, "true"))
+					if (cb == 4 && as<std::string_view>(buffer).starts_with("true"sv))
 						return true;
-					else if (cb == 5 && std::equal(buffer, buffer + 5, "false"))
+					else if (cb == 5 && as<std::string_view>(buffer).starts_with("false"sv))
 						return false;
 					else
 						throw std::bad_variant_access{};

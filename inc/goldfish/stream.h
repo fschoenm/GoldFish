@@ -178,9 +178,7 @@ namespace goldfish::stream
 		{
 			if (m_data.size() < sizeof(T))
 				return std::nullopt;
-			T t;
-			memcpy(&t, m_data.data(), sizeof(t));
-			return t;
+			return as<T>(m_data);
 		}
 		template <class T> T read_helper(std::integral_constant<size_t, 1>)
 		{
@@ -192,10 +190,8 @@ namespace goldfish::stream
 		{
 			if (m_data.size() < sizeof(T))
 				throw unexpected_end_of_stream();
-			T t;
-			memcpy(&t, m_data.data(), sizeof(t));
-			remove_front(m_data, sizeof(t));
-			return t;
+			auto data = remove_front(m_data, sizeof(T));
+			return as<T>(data);
 		}
 
 		std::span<const byte> data() const { return m_data; }
@@ -278,7 +274,7 @@ namespace goldfish::stream
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) == 1, void> write(const T& t)
 		{
 			assert(!m_flushed);
-			m_data.push_back(reinterpret_cast<const byte&>(t));
+			m_data.push_back(std::bit_cast<byte>(t));
 		}
 		const auto& data() const
 		{
@@ -306,14 +302,14 @@ namespace goldfish::stream
 			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 
-			m_data.append(std::string_view(reinterpret_cast<const char*>(d.data()), d.size()));
+			m_data.append(as<std::string_view>(d));
 		}
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) == 1, void> write(const T& t)
 		{
 			assert(!m_flushed);
-			m_data.push_back(reinterpret_cast<const char&>(t));
+			m_data.push_back(std::bit_cast<char>(t));
 		}
-		auto flush()
+		std::string flush()
 		{
 			assert(!m_flushed);
 			#ifndef NDEBUG
@@ -321,7 +317,7 @@ namespace goldfish::stream
 			#endif
 			return std::move(m_data);
 		}
-		const auto& data() const
+		const std::string& data() const
 		{
 			assert(!m_flushed);
 			return m_data;
