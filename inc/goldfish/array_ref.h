@@ -4,6 +4,10 @@
 #define GOLDFISH_HAS_STD_SPAN
 #endif
 
+#ifdef _WIN32
+#define GOLDFISH_HAS_DOUBLE_FROM_CHARS
+#endif
+
 #include "common.h"
 #include <array>
 #include <cassert>

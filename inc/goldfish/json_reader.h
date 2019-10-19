@@ -372,8 +372,13 @@ namespace goldfish::json
 	template <class Stream> double read_double(Stream& s, bool negative, uint64_t predecimal_digits)
 	{
 		static constexpr size_t MAX_DOUBLE_SIZE = 1079; // see https://stackoverflow.com/questions/1701055/
+#ifdef GOLDFISH_HAS_DOUBLE_FROM_CHARS
+		std::array<char, MAX_DOUBLE_SIZE> buffer; // NOLINT(hicpp-member-init, cppcoreguidelines-pro-type-member-init)
+#else //GOLDFISH_HAS_DOUBLE_FROM_CHARS
 		static constexpr size_t NULL_BYTE_SIZE = 1;
-		std::array<char, MAX_DOUBLE_SIZE + NULL_BYTE_SIZE> buffer;
+		std::array<char, MAX_DOUBLE_SIZE + NULL_BYTE_SIZE> buffer; // NOLINT(hicpp-member-init, cppcoreguidelines-pro-type-member-init)
+#endif //GOLDFISH_HAS_DOUBLE_FROM_CHARS
+	
 		auto buffer_iterator = buffer.begin();
 
 		if (negative)
@@ -382,7 +387,7 @@ namespace goldfish::json
 		char* start = negative ? std::begin(buffer) + 1 : std::begin(buffer);
 		std::to_chars_result to_char_result = std::to_chars(start, std::end(buffer), predecimal_digits);
 		assert(static_cast<std::underlying_type_t<decltype(to_char_result.ec)>>(to_char_result.ec) == 0);
-		buffer_iterator += (to_char_result.ptr - start);
+		std::advance(buffer_iterator, to_char_result.ptr - start);
 
 		//Process either '.','e','E'
 		*buffer_iterator++ = stream::read<char>(s);
@@ -397,12 +402,23 @@ namespace goldfish::json
 				stream::read<char>(s);
 		}
 
+#ifdef GOLDFISH_HAS_DOUBLE_FROM_CHARS
+		//according to https://blogs.msdn.microsoft.com/vcblog/2018/09/18/stl-features-and-fixes-in-vs-2017-15-8/
+		//std::from_chars is approximately 40% faster than the CRT’s strtod()/strtof().
+		double strtod_result;
+		std::from_chars_result from_char_result = std::from_chars(buffer.data(), &*buffer_iterator, strtod_result);
+		if (static_cast<std::underlying_type_t<decltype(from_char_result.ec)>>(from_char_result.ec) != 0 || (from_char_result.ptr != &*buffer_iterator))
+			throw integer_overflow_in_json{ "Error parsing JSON number" };
+
+#else //GOLDFISH_HAS_DOUBLE_FROM_CHARS
 		*buffer_iterator = 0;
 		errno = 0;
 		char* end_ptr;
 		double strtod_result = std::strtod(buffer.data(), &end_ptr);
 		if (errno != 0 || (end_ptr != &*buffer_iterator))
 			throw integer_overflow_in_json{ "Error parsing JSON number" };
+#endif //GOLDFISH_HAS_DOUBLE_FROM_CHARS
+
 		return strtod_result;
 	}
 
