@@ -79,7 +79,7 @@ namespace goldfish::stream
 	template <class T, class stream> auto write(stream& s, const T& t) -> decltype(s.write(t)) { return s.write(t); }
 	template <class T, class stream> enable_if_writer_t<stream, std::enable_if_t<std::is_standard_layout<T>::value && !has_write<stream, T>::value, void>> write(stream& s, const T& t)
 	{
-		s.write_buffer(as_bytes(std::span<const T>(t)));
+		s.write_buffer(goldfish::as_bytes(std::span<const T>(&t, 1)));
 	}
 
 	template <class inner> class ref_reader;
