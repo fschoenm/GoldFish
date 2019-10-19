@@ -38,14 +38,22 @@ using nonstd::span;
 
 namespace goldfish
 {
+#ifdef GOLDFISH_HAS_STD_SPAN
 	template <class ElementType, size_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+#else
+	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+#endif
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
 		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 	}
 
+#ifdef GOLDFISH_HAS_STD_SPAN
 	template <class ElementType, size_t Extent>
+#else
+	template <class ElementType, std::ptrdiff_t Extent>
+#endif
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::span<ElementType, Extent> s) noexcept
 	{
@@ -62,7 +70,8 @@ namespace goldfish
 	inline 
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::string_view s) noexcept {
-		return {reinterpret_cast<const byte*>(s.data()), s.size()}; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+		return { reinterpret_cast<const byte*>(s.data()), s.size() }; // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	}
 	}
 
 	inline size_t copy_span(std::span<const byte> from, std::span<byte> to)
