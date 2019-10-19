@@ -83,15 +83,14 @@ namespace goldfish
 		{
 			assert(!m_moved_from);
 			double result = std::visit([&](auto&& arg) -> double {
-				using Ti = std::decay_t<decltype(arg)>;
-				auto& x = const_cast<Ti&>(arg);
-				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::floating_point>) { return x; }
-				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::unsigned_int>) { return static_cast<double>(x); }
-				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::signed_int>) { return static_cast<double>(x); }
-				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>)
+				using tag = tags::tag_t<std::decay_t<decltype(arg)>>;
+				if constexpr (std::is_same_v<tag, tags::floating_point>) { return arg; }
+				else if constexpr (std::is_same_v<tag, tags::unsigned_int>) { return static_cast<double>(arg); }
+				else if constexpr (std::is_same_v<tag, tags::signed_int>) { return static_cast<double>(arg); }
+				else if constexpr (std::is_same_v<tag, tags::string>)
 				{
  					// We need to buffer the stream because read_number uses "peek<char>"
- 					auto s = stream::buffer<1>(stream::ref(x));
+ 					auto s = stream::buffer<1>(stream::ref(arg));
  					try
  					{
 						double result = std::visit([](auto&& x) -> double { return static_cast<double>(x); }, json::read_number(s, stream::read<char>(s)));

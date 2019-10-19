@@ -165,8 +165,7 @@ namespace goldfish::sax
 			return document.visit([&](auto&& x) {
 				if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::binary>) { return write(x); }
 				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::string>) {
-					auto t = const_cast<std::remove_const_t<decltype(this)>>(this); //?!?
-			 		return copy(x, [&](size_t cb) { return t->start_string(cb); }, [&] { return t->start_string(); });
+			 		return copy(x, [&](size_t cb) { return start_string(cb); }, [&] { return start_string(); });
 				}
 				else if constexpr (std::is_same_v<decltype(tags::get_tag(x)), tags::array>) {
 					auto array_writer = start_array();
