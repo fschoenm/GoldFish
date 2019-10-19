@@ -10,8 +10,11 @@
 
 #include "common.h"
 #include <array>
+#include <bit>
 #include <cassert>
+#include <cstring>
 #include <iterator>
+#include <string_view>
 #include <vector>
 
 #ifdef GOLDFISH_HAS_STD_SPAN
@@ -35,6 +38,22 @@ using nonstd::span;
 #define USING_GSL_SPAN_DEFINED
 #endif
 #endif
+
+namespace std { // NOLINT(cert-dcl58-cpp)
+	template <class To, class From>
+	typename std::enable_if_t<(sizeof(To) == sizeof(From)) && std::is_trivially_copyable<From>::value && std::is_trivial<To>::value, To>
+	constexpr
+	bit_cast(const From &src) noexcept
+	{
+#if !defined __GLIBCXX__ && !defined _WIN32
+		return __builtin_bit_cast(To, src);
+#else
+		To dst;
+    	std::memcpy(&dst, &src, sizeof(To));
+    	return dst;
+#endif
+	}
+} // namespace std
 
 namespace goldfish
 {

@@ -90,7 +90,7 @@ namespace goldfish::cbor
 
 			static_assert(sizeof(double) == sizeof(uint64_t), "Expect 64 bit doubles");
 			stream::write(m_stream, static_cast<byte>((7 << 5) | 27));
-			auto i = *reinterpret_cast<uint64_t*>(&x); //NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			auto i = std::bit_cast<uint64_t>(x);
 			stream::write(m_stream, to_big_endian(i));
 			return m_stream.flush();
 		}
@@ -98,7 +98,7 @@ namespace goldfish::cbor
 		{
 			static_assert(sizeof(float) == sizeof(uint32_t), "Expect 32 bit floats");
 			stream::write(m_stream, static_cast<byte>((7 << 5) | 26));
-			auto i = *reinterpret_cast<uint32_t*>(&x); //NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			auto i = std::bit_cast<uint32_t>(x);
 			stream::write(m_stream, to_big_endian(i));
 			return m_stream.flush();
 		}

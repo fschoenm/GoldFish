@@ -5,6 +5,7 @@
 #include "sax_reader.h"
 #include "stream.h"
 #include "tags.h"
+#include <cmath>
 #include <optional>
 #include <variant>
 
@@ -208,10 +209,10 @@ namespace goldfish::cbor
 	};
 
 	static_assert(sizeof(float) == sizeof(uint32_t), "Expect 32 bit floats");
-	inline float to_float(uint32_t x) { return *reinterpret_cast<float*>(&x); } //NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	inline float to_float(uint32_t x) { return std::bit_cast<float>(x); }
 
 	static_assert(sizeof(double) == sizeof(uint64_t), "Expect 64 bit doubles");
-	inline double to_double(uint64_t x) { return *reinterpret_cast<double*>(&x); } //NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+	inline double to_double(uint64_t x) { return std::bit_cast<double>(x); }
 
 	// Read one integer from the stream. Additional is the low 5 bits of the first byte of the document
 	// (ie the byte stripped of the major type)
