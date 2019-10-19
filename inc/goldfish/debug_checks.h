@@ -14,15 +14,15 @@ namespace goldfish::debug_checks
 		static void on_error() { std::terminate(); }
 	};
 	
-	#ifndef GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER
-		#define GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER no_check
-	#endif
-
 	#ifndef NDEBUG
 	using default_error_handler = terminate_on_error;
-	#else
+	#else //NDEBUG
+	#ifndef GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER
+	using default_error_handler = no_check;
+	#else // GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER
 	using default_error_handler = GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER;
-	#endif
+	#endif // GOLDFISH_DEFAULT_SHIP_ERROR_HANDLER
+	#endif // NDEBUG
 
 	template <class error_handler> class container_base
 	{
