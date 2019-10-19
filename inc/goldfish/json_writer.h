@@ -70,6 +70,7 @@ namespace goldfish::json
 
 				switch (lookup[*it]) // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 				{
+					case F: std::terminate();
 					case B: stream::write(m_stream, '\\'); stream::write(m_stream, 'b'); break;
 					case N: stream::write(m_stream, '\\'); stream::write(m_stream, 'n'); break;
 					case R: stream::write(m_stream, '\\'); stream::write(m_stream, 'r'); break;
