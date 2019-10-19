@@ -3,8 +3,11 @@
 #include "array_ref.h"
 #include "common.h"
 #include <array>
+#include <cstring>
 #include <optional>
 #include <vector>
+#include <string>
+#include <string_view>
 
 namespace goldfish::stream
 {
@@ -34,7 +37,7 @@ namespace goldfish::stream
 
 	template <class Stream> enable_if_reader_t<Stream, size_t> read_full_buffer(Stream&& s, std::span<byte> buffer)
 	{
-		std::ptrdiff_t cur = 0;
+		size_t cur = 0;
 		while (cur != buffer.size())
 		{
 			auto cb = s.read_partial_buffer(buffer.subspan(cur));
@@ -259,7 +262,7 @@ namespace goldfish::stream
 		void write_buffer(std::span<const byte> d)
 		{
 			assert(!m_flushed);
-			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
+			if (m_data.capacity() - m_data.size() < d.size())
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 			m_data.insert(m_data.end(), d.begin(), d.end());
 		}
@@ -299,11 +302,12 @@ namespace goldfish::stream
 		void write_buffer(std::span<const byte> d)
 		{
 			assert(!m_flushed);
-			if (m_data.capacity() - m_data.size() < static_cast<size_t>(d.size()))
+			if (m_data.capacity() - m_data.size() < d.size())
 				m_data.reserve(m_data.capacity() + m_data.capacity() / 2);
 
 			m_data.append(as<std::string_view>(d));
 		}
+
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value && sizeof(T) == 1, void> write(const T& t)
 		{
 			assert(!m_flushed);
