@@ -103,7 +103,7 @@ namespace goldfish::json
 				Q, // quote: " character
 				I, // character should have been escaped or is not a valid UTF8 character
 			};
-			static const category lookup[] = {
+			static constexpr std::array<category, 256> lookup = {
 				/*       0 1 2 3 4 5 6 7 8 9 A B C D E F */
 				/*0x00*/ I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,
 				/*0x10*/ I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,
@@ -122,13 +122,13 @@ namespace goldfish::json
 				/*0xE0*/ S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,
 				/*0xF0*/ S,S,S,S,S,S,S,S,I,I,I,I,I,I,I,I,
 			};
-			static_assert(sizeof(lookup) / sizeof(lookup[0]) == 256, "The lookup table should have 256 entries");
+			static_assert(lookup.size() == 256, "The lookup table should have 256 entries");
 
 			while (!buffer.empty())
 			{
 				byte c;
 				auto it = buffer.begin();
-				while (lookup[c = stream::read<byte>(m_stream)] == S)
+				while (lookup[c = stream::read<byte>(m_stream)] == S) // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 				{
 					*(it++) = c;
 					if (it == buffer.end())
@@ -136,7 +136,7 @@ namespace goldfish::json
 				}
 				remove_front(buffer, it - buffer.begin());
 
-				switch (lookup[c])
+				switch (lookup[c]) // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)s
 				{
 				case E:
 					switch (stream::read<byte>(m_stream))

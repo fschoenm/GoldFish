@@ -91,7 +91,7 @@ namespace goldfish::stream
 		}
 		byte character_to_6bits(byte c)
 		{
-			static const byte lookup_table[] = {
+			static constexpr std::array<byte, 256> lookup_table = {
 				64,64,64,64,64,64,64,64,64,64,
 				64,64,64,64,64,64,64,64,64,64,
 				64,64,64,64,64,64,64,64,64,64,
@@ -119,8 +119,8 @@ namespace goldfish::stream
 				64,64,64,64,64,64,64,64,64,64,
 				64,64,64,64,64,64
 			};
-			static_assert(sizeof(lookup_table) == 256 );
-			auto result = lookup_table[c];
+			static_assert(lookup_table.size() == 256);
+			auto result = lookup_table[c]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 			if (result >= 64)
 				throw ill_formatted_base64_data{ "Invalid character in base64 stream" };
 			return result;
@@ -194,10 +194,11 @@ namespace goldfish::stream
 	private:
 		byte character_from_6bits(byte x)
 		{
-			static const char table[65] =
+			static constexpr std::string_view table =
 				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"abcdefghijklmnopqrstuvwxyz"
-				"0123456789+/";
+				"0123456789+/"sv;
+			assert(x < table.size());
 			return static_cast<byte>(table[x]);
 		}
 		void write_triplet(uint32_t a, uint32_t b, uint32_t c)

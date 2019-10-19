@@ -37,7 +37,7 @@ namespace goldfish::json
 				S, /* \\ */
 				U, /* \u00?? */
 			};
-			static const category lookup[] = {
+			static constexpr std::array<category, 256> lookup = {
 				/*       0 1 2 3 4 5 6 7 8 9 A B C D E F */
 				/*0x00*/ U,U,U,U,U,U,U,U,B,T,N,U,U,R,U,U,
 				/*0x10*/ U,U,U,U,U,U,U,U,U,U,U,U,U,U,U,U,
@@ -56,19 +56,19 @@ namespace goldfish::json
 				/*0xE0*/ F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,
 				/*0xF0*/ F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,
 			};
-			static_assert(sizeof(lookup) / sizeof(lookup[0]) == 256, "The lookup table should have 256 entries");
+			static_assert(lookup.size() == 256, "The lookup table should have 256 entries");
 
 			auto it = buffer.begin();
 			for (;;)
 			{
 				auto prev = it;
-				while (it != buffer.end() && lookup[*it] == F)
+				while (it != buffer.end() && lookup[*it] == F) // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 					++it;
 				m_stream.write_buffer(buffer.subspan(prev - buffer.begin(), it - prev));
 				if (it == buffer.end())
 					break;
 
-				switch (lookup[*it])
+				switch (lookup[*it]) // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 				{
 					case B: stream::write(m_stream, '\\'); stream::write(m_stream, 'b'); break;
 					case N: stream::write(m_stream, '\\'); stream::write(m_stream, 'n'); break;
@@ -78,8 +78,8 @@ namespace goldfish::json
 					case S: stream::write(m_stream, '\\'); stream::write(m_stream, '\\'); break;
 					case U:
 					{
-						char data[6] = { '\\', 'u', '0', '0', "0123456789ABCDEF"[*it / 16], "0123456789ABCDEF"[*it % 16] };
-						m_stream.write_buffer(as_bytes(data));
+						std::array<char, 6> data = { '\\', 'u', '0', '0', "0123456789ABCDEF"[*it / 16], "0123456789ABCDEF"[*it % 16] }; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+						m_stream.write_buffer(goldfish::as_bytes(std::span<const char>(data)));
 					}
 					break;
 				}
