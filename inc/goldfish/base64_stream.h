@@ -126,8 +126,8 @@ namespace goldfish::stream
 			return result;
 		}
 		inner m_stream;
-		std::array<byte, 3> m_already_parsed;
-		uint8_t m_cb_already_parsed = 0;
+		std::array<byte, 3> m_already_parsed {};
+		uint8_t m_cb_already_parsed { 0 };
 	};
 
 	// Write base64 data to inner when binary data is provided
@@ -226,7 +226,7 @@ namespace goldfish::stream
 		}
 
 		inner m_stream;
-		std::array<byte, 2> m_pending_encoding;
+		std::array<byte, 2> m_pending_encoding {};
 		uint8_t m_cb_pending_encoding = 0;
 	};
 
