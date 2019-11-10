@@ -164,32 +164,20 @@ namespace goldfish::stream
 
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value, T> read()
 		{
-			return read_helper<T>(std::integral_constant<size_t, alignof(T)>());
+			return read_helper<T>();
 		}
 		template <class T> std::enable_if_t<std::is_standard_layout<T>::value, std::optional<T>> peek()
 		{
-			return peek_helper<T>(std::integral_constant<size_t, alignof(T)>());
+			return peek_helper<T>();
 		}
 	private:
-		template <class T> std::optional<T> peek_helper(std::integral_constant<size_t, 1>)
-		{
-			if (m_data.size() < sizeof(T))
-				return std::nullopt;
-			return reinterpret_cast<const T&>(*m_data.data());
-		}
-		template <class T, size_t s> std::optional<T> peek_helper(std::integral_constant<size_t, s>)
+		template <class T> std::optional<T> peek_helper()
 		{
 			if (m_data.size() < sizeof(T))
 				return std::nullopt;
 			return as<T>(m_data);
 		}
-		template <class T> T read_helper(std::integral_constant<size_t, 1>)
-		{
-			if (m_data.size() < sizeof(T))
-				throw unexpected_end_of_stream();
-			return reinterpret_cast<const T&>(*remove_front(m_data, sizeof(T)).data());
-		}
-		template <class T, size_t s> T read_helper(std::integral_constant<size_t, s>)
+		template <class T> T read_helper()
 		{
 			if (m_data.size() < sizeof(T))
 				throw unexpected_end_of_stream();
@@ -236,7 +224,7 @@ namespace goldfish::stream
 		}
 		string_reader(string_reader&& rhs) noexcept
 		{
-			auto index_from = rhs.m_data.data() - reinterpret_cast<const byte*>(rhs.m_buffer.data());
+			auto index_from = rhs.m_data.data() - as_bytes(std::string_view(m_buffer)).data();
 			m_buffer = std::move(rhs.m_buffer);
 			m_data = as_bytes(std::string_view(m_buffer)).subspan(index_from, rhs.m_data.size());
 		}
