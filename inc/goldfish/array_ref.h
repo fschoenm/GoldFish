@@ -13,9 +13,6 @@
 #ifdef GOLDFISH_HAS_STD_SPAN
 #include <span>
 #else
-#ifndef  span_CONFIG_INDEX_TYPE
-# define span_CONFIG_INDEX_TYPE  size_t
-#endif
 #include <span-lite/span.hpp>
 #endif
 
@@ -24,7 +21,6 @@ using namespace std::literals::string_view_literals;
 #ifndef GOLDFISH_HAS_STD_SPAN
 #ifndef USING_GSL_SPAN_DEFINED
 namespace std {
-using nonstd::as_writeable_bytes;
 using nonstd::dynamic_extent;
 using nonstd::span;
 }
