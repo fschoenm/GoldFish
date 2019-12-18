@@ -31,14 +31,14 @@ using nonstd::span;
 namespace goldfish
 {
 
-	template <class ElementType, std::ptrdiff_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
+	template <class ElementType, size_t Extent, class = std::enable_if_t<!std::is_const<ElementType>::value>>
 	std::span<byte, std::dynamic_extent>
 	as_writeable_bytes(std::span<ElementType, Extent> s) noexcept
 	{
 		return {reinterpret_cast<byte*>(s.data()), s.size_bytes()};
 	}
 
-	template <class ElementType, std::ptrdiff_t Extent>
+	template <class ElementType, size_t Extent>
 	std::span<const byte, std::dynamic_extent>
 	as_bytes(std::span<ElementType, Extent> s) noexcept
 	{
