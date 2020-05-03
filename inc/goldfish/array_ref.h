@@ -1,24 +1,26 @@
 #pragma once
 
-#if !defined __GLIBCXX__ && !defined _WIN32
-#define GOLDFISH_HAS_STD_SPAN
-#endif
+#if defined(__clang__) && __clang_major__ >= 9 && defined(_LIBCPP_VERSION)
+#define __cpp_lib_span 201902L
+#endif // defined(__clang__) && __clang_major__ >= 9
 
 #include <array>
-#include <assert.h>
-#include "common.h"
+#include <cassert>
 #include <iterator>
 #include <vector>
+#include <version>
 
-#ifdef GOLDFISH_HAS_STD_SPAN
+#ifdef __cpp_lib_span
 #include <span>
 #else
 #include <span-lite/span.hpp>
 #endif
 
+#include "common.h"
+
 using namespace std::literals::string_view_literals;
 
-#ifndef GOLDFISH_HAS_STD_SPAN
+#ifndef __cpp_lib_span
 #ifndef USING_GSL_SPAN_DEFINED
 namespace std {
 using nonstd::dynamic_extent;
