@@ -36,7 +36,7 @@ namespace goldfish { namespace stream
 				fill_in_buffer();
 
 			auto cb = std::min(m_buffered.size(), data.size());
-			copy_span(remove_front(m_buffered, cb), std::span<byte>{ data.begin(), cb });
+			copy_span(remove_front(m_buffered, cb), std::span<byte>{ data.data(), cb });
 			return cb;
 		}
 
