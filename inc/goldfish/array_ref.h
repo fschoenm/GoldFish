@@ -1,16 +1,12 @@
 #pragma once
 
-#if defined(__clang__) && __clang_major__ >= 9 && defined(_LIBCPP_VERSION)
-#define __cpp_lib_span 201902L
-#endif // defined(__clang__) && __clang_major__ >= 9
-
 #include <array>
 #include <cassert>
 #include <iterator>
 #include <vector>
 #include <version>
 
-#ifdef __cpp_lib_span
+#ifdef __has_include(<span>)
 #include <span>
 #else
 #include <span-lite/span.hpp>
