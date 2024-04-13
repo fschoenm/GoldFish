@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <iterator>
+#include <string_view>
 #include <vector>
 #include <version>
 
