@@ -374,8 +374,7 @@ namespace goldfish { namespace json
 	template <class Stream> double read_double(Stream& s, bool negative, uint64_t predecimal_digits)
 	{
 		static constexpr size_t MAX_DOUBLE_SIZE = 1079; // see https://stackoverflow.com/questions/1701055/
-		static constexpr size_t NULL_BYTE_SIZE = 1;
-		std::array<char, MAX_DOUBLE_SIZE + NULL_BYTE_SIZE> buffer;
+		std::array<char, MAX_DOUBLE_SIZE> buffer;
 		auto buffer_iterator = buffer.begin();
 
 		if (negative)
@@ -399,12 +398,11 @@ namespace goldfish { namespace json
 				stream::read<char>(s);
 		}
 
-		*buffer_iterator = 0;
-		errno = 0;
-		char* end_ptr;
-		double strtod_result = std::strtod(buffer.data(), &end_ptr);
-		if (errno != 0 || (end_ptr != &*buffer_iterator))
+                double strtod_result = 0.;
+		auto [end_ptr, err] = std::from_chars(buffer.data(), &*buffer_iterator, strtod_result);
+		if (err != std::errc() || (end_ptr != &*buffer_iterator))
 			throw integer_overflow_in_json{ "Error parsing JSON number" };
+
 		return strtod_result;
 	}
 
