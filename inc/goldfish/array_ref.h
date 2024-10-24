@@ -7,7 +7,7 @@
 #include <vector>
 #include <version>
 
-#ifdef __has_include(<span>)
+#if __has_include(<span>)
 #include <span>
 #else
 #include <span-lite/span.hpp>
