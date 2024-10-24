@@ -5,6 +5,7 @@
 #include <optional>
 #include "base64_stream.h"
 #include "buffered_stream.h"
+#include <limits>
 #include <type_traits>
 #include <variant>
 
